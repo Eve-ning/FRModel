@@ -24,7 +24,10 @@ class _Frame2DImage(ABC):
 
     def crop_glcm(self: 'Frame2D', glcm_radius: int, glcm_by: int = 1) -> _Frame2DImage:
         """ Crops the frame to match GLCM cropping. """
-        return self.crop(glcm_radius + glcm_by, glcm_radius + glcm_by, glcm_radius, glcm_radius)
+        return self.crop(glcm_radius + glcm_by,
+                         glcm_radius + glcm_by,
+                         glcm_radius + glcm_by,
+                         glcm_radius + glcm_by)
 
     def save(self: 'Frame2D', file_path: str, **kwargs) -> None:
         """ Saves the current Frame file

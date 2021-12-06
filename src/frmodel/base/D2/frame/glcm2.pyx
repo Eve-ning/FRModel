@@ -28,7 +28,7 @@ from libc.math cimport isnan
 
 
 cdef enum:
-    CONTRAST = 0
+    HOMOGENEITY = 0
     CORRELATION = 1
     ASM = 2
     MEAN = 3
@@ -101,9 +101,9 @@ cdef class CyGLCM:
 
         # The following statements will rescale the features to [0,1]
         # To fully understand why I do this, refer to my research journal.
-        features[..., CONTRAST]    /= (self.bins - 1) ** 2
-        features[..., MEAN]        /= self.bins - 1
-        features[..., VAR]         /= (self.bins - 1) ** 2
+        features[..., HOMOGENEITY]  /= (self.bins - 1) ** 2
+        features[..., MEAN]           /= self.bins - 1
+        features[..., VAR]            /= (self.bins - 1) ** 2
         features[..., CORRELATION] = (features[..., CORRELATION] + len(self.pairs)) / 2
 
         return self.features / len(self.pairs)
@@ -185,8 +185,8 @@ cdef class CyGLCM:
 
         for cr in range(self.bins):
             for cc in range(self.bins):
-                features[CONTRAST] += glcm[cr, cc] * (<double>(i - j) ** 2)
-                features[ASM]      += glcm[cr, cc] ** 2
+                features[HOMOGENEITY] += glcm[cr, cc] / (1 + <double>(i - j) ** 2)
+                features[ASM]           += glcm[cr, cc] ** 2
                 var_i += glcm[cr, cc] * (cr - mean_i) ** 2
                 var_j += glcm[cr, cc] * (cc - mean_j) ** 2
 

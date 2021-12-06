@@ -63,7 +63,7 @@ class _Frame2DScaling(ABC):
         return self.create(data=(self.data - from_min) / (from_max - from_min) * (to_max - to_min) + to_min,
                            labels=self.labels)
 
-    def scale_values_on_band(self: 'Frame2D', to_min: int, to_max: int):
-        return self.create(data=minmax_scale(self.data.reshape([-1, self.shape[-1]]), axis=-1)
-                           .reshape(self.shape) * (to_max - to_min),
+    def scale_values_on_band(self: 'Frame2D'):
+        denom = self.data.sum(axis=-1)[..., np.newaxis]
+        return self.create(data=self.data / denom,
                            labels=self.labels)

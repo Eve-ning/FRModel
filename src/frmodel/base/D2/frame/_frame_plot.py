@@ -73,7 +73,7 @@ class Frame2DPlot:
         """
         for ax, d in self._create_grid(scale):
             d: np.ma.MaskedArray
-            ax.imshow(minmax_scale(d.flatten(), feature_range=(0,1)).reshape(d.shape),
+            ax.imshow(minmax_scale(d.flatten(), feature_range=(0,1)).reshape(d.shape),interpolation='nearest',
                       cmap=colormap, origin='upper')
         return plt.gcf()
 

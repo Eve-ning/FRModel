@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import List, TYPE_CHECKING, Union, Iterable
+from typing import List, TYPE_CHECKING, Union, Iterable, Tuple
 
 import numpy as np
 
@@ -19,7 +19,8 @@ class _Frame2DChannelFastGLCM(ABC):
                  chns: Iterable[Frame2D.CHN] = (),
                  radius: int = 2,
                  bins: int = 8,
-                 step_size: int = 1):
+                 step_size: int = 1,
+                 pairs: Tuple[str] = ('N', 'W', 'NW', 'SW')):
         """ This will get the GLCM statistics for this window
 
         Details on how GLCM works is shown on the wiki.
@@ -37,8 +38,8 @@ class _Frame2DChannelFastGLCM(ABC):
         # FAST GLCM
         chns = chns if chns else list(self.labels.keys())
 
-        self._data = self.data.astype(np.float32)
-        self._data = self.scale_values_on_band(0, 1).data
+        self._data = self.data.astype(np.double)
+        self._data = self.scale_values_on_band().data
 
         mask = None
         if np.isnan(self.data).any():
@@ -49,7 +50,8 @@ class _Frame2DChannelFastGLCM(ABC):
         data = CyGLCM(self[..., chns].data,
                       radius=radius,
                       bins=bins,
-                      step_size=step_size).create_glcm()
+                      step_size=step_size,
+                      pairs=pairs).create_glcm()
         data = data.swapaxes(-2, -1).reshape([*data.shape[:2], -1])
         if mask is not None:
             trim = radius + step_size
@@ -63,7 +65,7 @@ class _Frame2DChannelFastGLCM(ABC):
         labels.extend(CONSTS.CHN.GLCM.MEAN(list(self._util_flatten(chns))))
         labels.extend(CONSTS.CHN.GLCM.VAR( list(self._util_flatten(chns))))
 
-        self._data = self.crop_glcm(radius, glcm_by=(step_size * 2)).data
+        self._data = self.crop_glcm(radius, glcm_by=step_size).data
         t = self.append(data, labels=labels)
         self._data = t.data
         self._labels = t.labels
