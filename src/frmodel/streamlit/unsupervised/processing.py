@@ -1,6 +1,5 @@
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Tuple
 
 import cv2
 
@@ -14,7 +13,6 @@ from skimage.measure import label
 from skimage.morphology import remove_small_objects, remove_small_holes
 from skimage.segmentation import watershed
 
-from frmodel.base.D2 import Frame2D
 from frmodel.streamlit.unsupervised.settings import Settings
 
 @dataclass

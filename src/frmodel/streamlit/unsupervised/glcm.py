@@ -9,8 +9,13 @@ from frmodel.streamlit.unsupervised.settings import Settings
 
 def analysis(proc:Processing, settings: Settings):
 
+    # The number of trees
     trees_len = int(proc.img_wts.max())
+
+    # Show Tree Count
     st.metric(f"Number of trees found", trees_len)
+
+
     st.caption("Showing significantly sized trees: ")
 
     img_wts_color = np.repeat(proc.img_wts[..., np.newaxis], proc.img_color.shape[-1], 2)
@@ -20,7 +25,6 @@ def analysis(proc:Processing, settings: Settings):
     for tree_ix in range(1, trees_len):
         tree_bool = img_wts_color == tree_ix
         if np.sum(tree_bool) < (settings.img_area * 0.1): continue
-        # p.img_color[:, [0, 2]] = p.img_color[:, [1, 0]]
         img = np.where(tree_bool, proc.img_color, np.nan)
 
         bins = np.linspace(0, 255, settings.hist_bins)

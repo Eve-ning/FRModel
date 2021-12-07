@@ -1,27 +1,4 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-from copy import deepcopy
-from io import BytesIO
-
-import cv2
-
-import numpy as np
-import pandas as pd
-import requests
-import skimage.transform
 import streamlit as st
-from PIL import Image
-import altair as alt
-from scipy.ndimage import distance_transform_edt
-from skimage.draw import circle_perimeter
-from skimage.feature import peak_local_max
-from skimage.filters import try_all_threshold, threshold_yen
-from skimage.measure import label
-from skimage.morphology import remove_small_objects, remove_small_holes
-from skimage.segmentation import watershed
-from frmodel.base.D2 import Frame2D
 from frmodel.streamlit.unsupervised.analysis import analysis
 from frmodel.streamlit.unsupervised.settings import settings
 from frmodel.streamlit.unsupervised.processing import processing
