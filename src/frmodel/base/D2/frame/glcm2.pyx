@@ -101,7 +101,7 @@ cdef class CyGLCM:
 
         # The following statements will rescale the features to [0,1]
         # To fully understand why I do this, refer to my research journal.
-        features[..., HOMOGENEITY]  /= (self.bins - 1) ** 2
+        # features[..., HOMOGENEITY]    /= (self.bins - 1) ** 2 # Don't think scaling is needed.
         features[..., MEAN]           /= self.bins - 1
         features[..., VAR]            /= (self.bins - 1) ** 2
         features[..., CORRELATION] = (features[..., CORRELATION] + len(self.pairs)) / 2
@@ -173,8 +173,8 @@ cdef class CyGLCM:
                 # If there are any nan, we just abort, since it's useless data.
                 if isnan(i) or isnan(j): return
 
-                mean_i += i
-                mean_j += j
+                mean_i += <double> i
+                mean_j += <double> j
                 glcm[i, j] += <double> (1 / (2 * <double>(self.diameter ** 2)))
                 glcm[j, i] += <double> (1 / (2 * <double>(self.diameter ** 2))) # Symmetric for ASM.
 
@@ -185,17 +185,17 @@ cdef class CyGLCM:
 
         for cr in range(self.bins):
             for cc in range(self.bins):
-                features[HOMOGENEITY] += glcm[cr, cc] / (1 + <double>(i - j) ** 2)
+                features[HOMOGENEITY]   += glcm[cr, cc] / (1 + <double>(i - j) ** 2)
                 features[ASM]           += glcm[cr, cc] ** 2
-                var_i += glcm[cr, cc] * (cr - mean_i) ** 2
-                var_j += glcm[cr, cc] * (cc - mean_j) ** 2
+                var_i += glcm[cr, cc] * (<double> cr - mean_i) ** 2
+                var_j += glcm[cr, cc] * (<double> cc - mean_j) ** 2
 
         std = <double> (sqrt(var_i) * sqrt(var_j))
 
         if std != 0:
             for cr in range(self.bins):
                 for cc in range(self.bins):
-                    features[CORRELATION] += glcm[cr, cc] * (cr - mean_i) * (cc - mean_j) / std
+                    features[CORRELATION] += glcm[cr, cc] * (<double> cr - mean_i) * (<double> cc - mean_j) / std
 
         features[MEAN] += <double> ((mean_i + mean_j) / 2)
         features[VAR] += <double> ((var_i + var_j) / 2)

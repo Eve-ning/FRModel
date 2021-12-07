@@ -6,7 +6,7 @@ from typing import List, TYPE_CHECKING, Union, Iterable, Tuple
 import numpy as np
 
 from frmodel.base import CONSTS
-from frmodel.base.D2.frame.glcm import CyGLCM
+from frmodel.base.D2.frame.glcm2 import CyGLCM
 
 if TYPE_CHECKING:
     from frmodel.base.D2.frame2D import Frame2D
@@ -59,7 +59,7 @@ class _Frame2DChannelFastGLCM(ABC):
 
         labels = []
 
-        labels.extend(CONSTS.CHN.GLCM.CON( list(self._util_flatten(chns))))
+        labels.extend(CONSTS.CHN.GLCM.HMG( list(self._util_flatten(chns))))
         labels.extend(CONSTS.CHN.GLCM.COR( list(self._util_flatten(chns))))
         labels.extend(CONSTS.CHN.GLCM.ASM( list(self._util_flatten(chns))))
         labels.extend(CONSTS.CHN.GLCM.MEAN(list(self._util_flatten(chns))))
