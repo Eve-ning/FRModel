@@ -9,7 +9,7 @@ from frmodel.streamlit.unsupervised.processing import Processing
 from frmodel.streamlit.unsupervised.settings import Settings
 
 
-def analysis(proc:Processing, settings: Settings):
+def analysis(proc: Processing, settings: Settings):
 
     # The number of trees
     trees_len = int(proc.img_wts.max())
@@ -27,18 +27,21 @@ def analysis(proc:Processing, settings: Settings):
     # This will not be consistent as we don't progress for skipped trees.
     pbar = st.progress(0)
 
+    relative_hist = st.checkbox("Relative Histogram", value=True)
+
     # 2 Columns to show trees. The height of each entry should be consistent
     cols = st.columns(2)
 
     # This is just to swap between the 2 columns for each tree
     cols_ix = 0
+
     for tree_ix in range(1, trees_len):
 
         # This simply yields watershed part of specified index
         tree_bool_3 = img_wts_3 == tree_ix
 
         # Skip GLCM processing if the tree is too small
-        if np.sum(tree_bool_3) < (settings.img_area * 0.1): continue
+        if np.sum(tree_bool_3) < (settings.img_area * settings.glcm_min_size): continue
 
         # This yields the img (with nan) of the watershed boolean ix
         img = np.where(tree_bool_3, proc.img_color, np.nan)
@@ -47,18 +50,16 @@ def analysis(proc:Processing, settings: Settings):
         bins = np.linspace(0, 255, settings.hist_bins)
         df = pd.DataFrame(
             np.stack(
-                [np.histogram(img[..., 0].flatten(), bins=bins)[0],
-                 np.histogram(img[..., 1].flatten(), bins=bins)[0],
-                 np.histogram(img[..., 2].flatten(), bins=bins)[0]]
+                [np.histogram(img[..., k].flatten(), bins=bins)[0] for k in range(img.shape[-1])]
             ).T,
             index=bins[:-1],
-            columns=['R', 'G', 'B'])
+            columns=[f'Channel {k}' for k in range(img.shape[-1])])
 
         df = df.reset_index()
         df = df.melt(id_vars=['index'])
         c = alt.Chart(df, height=100).encode(x='index:Q', y='value:Q', color='variable:N').mark_line()
         tree_bool_color = np.where(tree_bool_3, proc.img_color, np.nan)
-        cols[cols_ix % 2].image(np.where(tree_bool_3, proc.img_color, proc.img_color // 4), "Tree Image")
+        cols[cols_ix % 2].image(np.where(tree_bool_3, proc.img_color, proc.img_color // 2), "Tree Image")
         cols[cols_ix % 2].altair_chart(c, True)
 
         # This is just the boolean with only 1 channel
@@ -81,23 +82,31 @@ def analysis(proc:Processing, settings: Settings):
                     x, y, w, h = x_, y_, w_, h_
 
         # Yield the smallest Frame2D from the bounding rect
-        f_tree = Frame2D(tree_bool_color[y:y+h, x:x+w], Frame2D.CHN.RGB)
-        f_tree.get_glcm(radius=settings.glcm_rad, bins=settings.glcm_bins)
+        f_tree = Frame2D(tree_bool_color[y:y+h, x:x+w], [f'Channel {k}' for k in range(img.shape[-1])])
 
+        glcm_success = \
+            f_tree.get_glcm(radius=settings.glcm_rad, bins=settings.glcm_bins, step_size=settings.step_size,
+                        scale_on_bands=False)
+        if glcm_success is None:
+            cols[cols_ix % 2].markdown("**GLCM Failed to Generate due to radius of GLCM**")
+            continue
         # Analyzes the GLCM
         data = f_tree.data
         data = data.reshape([-1, data.shape[-1]])
 
         bins = np.linspace(0, 1, settings.hist_bins)
+
         df_hist = pd.DataFrame(np.asarray([np.histogram(data[..., ch], bins)[0] for ch in range(data.shape[-1])]).T,
                          index=bins[:-1],
                          columns=f_tree.channels)
+        df_hist = df_hist.drop([c for c in df_hist.columns if "_" not in c], axis=1)
+
+        if relative_hist: df_hist /= df_hist.max()
         df_hist = df_hist.reset_index()
         df_hist = df_hist.melt(id_vars=['index'])
         c = alt.Chart(df_hist, height=100).encode(x='index:Q', y='value:Q', color='variable:N')
-        cols[cols_ix%2].caption(f"Historgram of GLCM w/ Basebands")
+        cols[cols_ix%2].caption(f"Relative Histogram of GLCM w/ Basebands")
         cols[cols_ix%2].altair_chart(c.mark_line(), True)
-
         # This is just for the fingerprinting, however, since the values are not bounded, it's kinda hard to get a
         # logical fingerprint
 

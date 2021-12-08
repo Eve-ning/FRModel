@@ -20,11 +20,12 @@ import numpy as np
 cimport numpy as np
 cimport cython
 from skimage.util import view_as_windows
-from libc.math cimport sqrt
 
 from tqdm import tqdm
 from libc.math cimport sqrt
 from libc.math cimport isnan
+
+from libc.math cimport NAN
 
 
 cdef enum:
@@ -35,7 +36,7 @@ cdef enum:
     VAR = 4
 
 cdef class CyGLCM:
-    cdef public unsigned int radius, diameter, D2, step_size, bins
+    cdef public unsigned int radius, diameter, D2, step_size, bins, invalid_value
     cdef public np.ndarray ar
     cdef public np.ndarray features
     cdef public np.ndarray glcm
@@ -53,6 +54,7 @@ cdef class CyGLCM:
         self.step_size = step_size
         self.diameter = radius * 2 + 1
         self.bins = bins
+        self.invalid_value = bins + 1
         self.ar = ar
         self.CORR_ERROR_VAL = -2
 
@@ -170,8 +172,9 @@ cdef class CyGLCM:
                 i = window_i[cr, cc]
                 j = window_j[cr, cc]
 
-                # If there are any nan, we just abort, since it's useless data.
-                if isnan(i) or isnan(j): return
+                # If there are any values == bin, we just abort, since it's useless data.
+                if i == self.invalid_value or j == self.invalid_value:
+                    return
 
                 mean_i += <double> i
                 mean_j += <double> j
@@ -206,8 +209,14 @@ cdef class CyGLCM:
     def _binarize(self, np.ndarray[double, ndim=3] ar) -> np.ndarray:
         """ This binarizes the 2D image by its min-max """
         if ar.max() != 0:
-            return ((ar / ar.max()) * (self.bins - 1)).astype(np.uint)
+            nan_mask = np.isnan(ar)
+            b = (((ar - np.nanmin(ar)) / np.nanmax(ar)) * (self.bins - 1)).astype(np.uint)
+            # We do this so that we can detect invalid values.
+            # Note that the values will span from [0, bin-1], so bin is an invalid value as we can check.
+            b[nan_mask] = self.invalid_value
+            return b
         else:
+            ar[np.isnan(ar)] = self.invalid_value
             return ar.astype(np.uint)
 
     @cython.boundscheck(True)
@@ -275,6 +284,7 @@ cdef class CyGLCM:
         pairs = []
         cdef int s = self.step_size
         original = ar_w[s:-s, s:-s]
+
 
         if ("N"  in self.pairs) or ("S"  in self.pairs): pairs.append((original, ar_w[:-s-s, s:-s]))
         if ("W"  in self.pairs) or ("E"  in self.pairs): pairs.append((original, ar_w[s:-s, s+s:]))

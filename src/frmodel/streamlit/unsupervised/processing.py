@@ -60,7 +60,7 @@ def processing(settings: Settings):
     img_color = (deepcopy(settings.f).data * 255).astype(np.uint8)
     p.img_color, p.img_color_txt = (img_color, "Original Image")
 
-    img_gray = cv2.cvtColor(img_color, cv2.COLOR_RGB2GRAY)
+    img_gray = cv2.cvtColor(img_color, cv2.COLOR_RGB2GRAY) if img_color.shape[-1] == 3 else img_color[:,:,0]
     p.img_gray, p.img_gray_txt = (img_gray, "Gray Image")
 
     img_thresh = threshold_yen(img_gray)
@@ -68,9 +68,9 @@ def processing(settings: Settings):
 
     p.img_yen, p.img_yen_txt = (img_yen * 255, "Yen Threshold")
 
-    with st.expander("All Thresholds"):
-        fig, ax = try_all_threshold(img_gray, figsize=(10, 8), verbose=False)
-        st.pyplot(fig)
+    # with st.expander("All Thresholds"):
+    #     fig, ax = try_all_threshold(img_gray, figsize=(10, 8), verbose=False)
+    #     st.pyplot(fig)
 
     img_rs = remove_small_holes(remove_small_objects(img_yen, settings.rso_size), settings.rsh_size)
 
