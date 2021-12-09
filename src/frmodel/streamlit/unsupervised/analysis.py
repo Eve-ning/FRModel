@@ -82,7 +82,14 @@ def analysis(proc: Processing, settings: Settings):
                     x, y, w, h = x_, y_, w_, h_
 
         # Yield the smallest Frame2D from the bounding rect
-        f_tree = Frame2D(tree_bool_color[y:y+h, x:x+w], [f'Channel {k}' for k in range(img.shape[-1])])
+        f_tree = Frame2D(tree_bool_color[y:y+h, x:x+w] / 255, [f'Channel {k}' for k in range(img.shape[-1])])
+
+        nan_img = np.isnan(f_tree.data)
+        st.text("NaN (%) : " + str(np.sum(nan_img) / nan_img.size * 100))
+
+        st.image(nan_img * 255)
+        st.text(np.nanmin(f_tree.data))
+        st.text(np.nanmax(f_tree.data))
 
         glcm_success = \
             f_tree.get_glcm(radius=settings.glcm_rad, bins=settings.glcm_bins, step_size=settings.step_size,
@@ -92,21 +99,27 @@ def analysis(proc: Processing, settings: Settings):
             continue
         # Analyzes the GLCM
         data = f_tree.data
+        # for i in range(data.shape[-1] - 3):
+        #     cols[cols_ix%2].image(data[..., i],width=300)
         data = data.reshape([-1, data.shape[-1]])
-
         bins = np.linspace(0, 1, settings.hist_bins)
 
-        df_hist = pd.DataFrame(np.asarray([np.histogram(data[..., ch], bins)[0] for ch in range(data.shape[-1])]).T,
-                         index=bins[:-1],
-                         columns=f_tree.channels)
-        df_hist = df_hist.drop([c for c in df_hist.columns if "_" not in c], axis=1)
+        st.text(np.nanmin(data[..., 4]))
 
-        if relative_hist: df_hist /= df_hist.max()
-        df_hist = df_hist.reset_index()
-        df_hist = df_hist.melt(id_vars=['index'])
-        c = alt.Chart(df_hist, height=100).encode(x='index:Q', y='value:Q', color='variable:N')
-        cols[cols_ix%2].caption(f"Relative Histogram of GLCM w/ Basebands")
-        cols[cols_ix%2].altair_chart(c.mark_line(), True)
+        st.text(np.nanmax(data[..., 4]))
+        for k in range(6):
+            df_hist = pd.DataFrame(np.asarray([np.histogram(data[..., ch][~np.isnan(data[..., ch])], bins)[0] for ch in range(k*3, k*3 + 3)]).T,
+                             index=bins[:-1],
+                             columns=f_tree.channels[k*3: k*3 + 3])
+            # df_hist = df_hist.drop([c for c in df_hist.columns if "_" not in c], axis=1)
+
+            if relative_hist: df_hist /= df_hist.max()
+            df_hist = df_hist.reset_index()
+            df_hist = df_hist.melt(id_vars=['index'])
+            c = alt.Chart(df_hist, height=100).encode(x='index:Q', y='value:Q', color='variable:N')
+            cols[cols_ix % 2].altair_chart(c.mark_line(), True)
+        # cols[cols_ix%2].caption(f"Relative Histogram of GLCM w/ Basebands")
+
         # This is just for the fingerprinting, however, since the values are not bounded, it's kinda hard to get a
         # logical fingerprint
 
@@ -116,6 +129,7 @@ def analysis(proc: Processing, settings: Settings):
 
         pbar.progress(int(tree_ix / trees_len * 100))
         cols_ix += 1
+        break
 
     pbar.progress(100)
 

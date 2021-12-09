@@ -104,11 +104,13 @@ cdef class CyGLCM:
         # The following statements will rescale the features to [0,1]
         # To fully understand why I do this, refer to my research journal.
         # features[..., HOMOGENEITY]    /= (self.bins - 1) ** 2 # Don't think scaling is needed.
-        features[..., MEAN]           /= self.bins - 1
-        features[..., VAR]            /= (self.bins - 1) ** 2
-        features[..., CORRELATION] = (features[..., CORRELATION] + len(self.pairs)) / 2
 
-        return self.features / len(self.pairs)
+        features[features == 0] = np.nan
+        features[..., MEAN]       /= self.bins - 1
+        features[..., VAR]        /= (self.bins - 1) ** 2
+        features[..., CORRELATION] = (features[..., CORRELATION] + len(self.pairs)) / 2
+        features /= len(self.pairs)
+        return features
 
     @cython.boundscheck(True)
     @cython.wraparound(False)
