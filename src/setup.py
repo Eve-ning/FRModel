@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="frmodel",
-    version="0.1.2",
+    version="0.1.3",
     author="Eve-ning",
     author_email="dev_evening@hotmail.com",
     description="The base package to support frmodel data processing",
@@ -24,7 +24,8 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     setup_requires=["cython", "numpy"],
-    install_requires=["numpy", "seaborn", "sklearn", "scikit-image", "tqdm", "plotly", "opencv-python"],
+    install_requires=["numpy", "seaborn", "sklearn", "scikit-image", "tqdm", "plotly",
+                      "opencv-python", "imagecodecs"],
     python_requires='>=3.7',
     include_package_data=True,
 )

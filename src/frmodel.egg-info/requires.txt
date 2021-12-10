@@ -5,3 +5,4 @@ scikit-image
 tqdm
 plotly
 opencv-python
+imagecodecs

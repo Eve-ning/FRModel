@@ -83,6 +83,9 @@ class _Frame2DChannelFastGLCM(ABC):
     def CON(self, chns: Union[List[str], str]):
         return self[:, :, [f"CON_{i}" for i in chns] if isinstance(chns, List) else f"CON_{chns}"]
 
+    def HMG(self, chns: Union[List[str], str]):
+        return self[:, :, [f"HMG_{i}" for i in chns] if isinstance(chns, List) else f"HMG_{chns}"]
+
     def COR(self, chns: Union[List[str], str]):
         return self[:, :, [f"COR_{i}" for i in chns] if isinstance(chns, List) else f"COR_{chns}"]
 

@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 from PIL import Image
-from osgeo import gdal
 from skimage.transform import resize
+from tifffile import tifffile
 
 from frmodel.base import CONSTS
 
@@ -73,18 +73,18 @@ class _Frame2DLoader(ABC):
 
         labels = [*cls.CHN.RGB, cls.CHN.RED_EDGE, cls.CHN.NIR]
 
-        band_ds: gdal.Dataset = gdal.Open(file_path_red)
-        data = np.zeros(shape=(5, band_ds.RasterYSize, band_ds.RasterXSize), dtype=np.float)
-        data[0, ...] = band_ds.GetRasterBand(1).ReadAsArray()
-        del band_ds
+        data = np.stack(
+            [
+                tifffile.imread(file_path_red),
+                tifffile.imread(file_path_green),
+                tifffile.imread(file_path_blue),
+                tifffile.imread(file_path_red_edge),
+                tifffile.imread(file_path_nir),
+            ],
+            axis=-1
+        )
 
-        for e, fp in enumerate((file_path_green, file_path_blue, file_path_red_edge, file_path_nir)):
-            band_ds: gdal.Dataset = gdal.Open(fp)
-            data[e + 1, ...] = band_ds.GetRasterBand(1).ReadAsArray()
-            del band_ds
-
-        data = np.moveaxis(data, 0, -1)
-        if scale != 1.0 :
+        if scale != 1.0:
             data = resize(data, output_shape=[int(scale * data.shape[0]),
                                               int(scale * data.shape[1])],
                           order=0)

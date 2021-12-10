@@ -17,15 +17,12 @@ Packages should be automatically downloaded. If not downloaded, here are the req
 **Python >= 3.7**
 
 ```
-pillow
-opencv
-pandas
-numpy
-python
-scipy
+seaborn
+sklearn
 scikit-image
-scikit-learn
-osgeo
+tqdm
+plotly
+opencv
 ```
 
 # License
