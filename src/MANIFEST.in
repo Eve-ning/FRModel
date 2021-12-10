@@ -1,0 +1,3 @@
+recursive-include frmodel *.pyx
+recursive-include frmodel *.pyd
+recursive-include frmodel *.pyi
