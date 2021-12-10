@@ -16,7 +16,6 @@ frmodel/base/D2/frame2D.py
 frmodel/base/D2/kmeans2D.py
 frmodel/base/D2/video2D.py
 frmodel/base/D2/frame/__init__.py
-frmodel/base/D2/frame/_cy_fast_glcm2.cp38-win_amd64.pyd
 frmodel/base/D2/frame/_frame_channel.py
 frmodel/base/D2/frame/_frame_channel_fast_glcm.py
 frmodel/base/D2/frame/_frame_channel_spec.py
@@ -26,9 +25,6 @@ frmodel/base/D2/frame/_frame_partition.py
 frmodel/base/D2/frame/_frame_plot.py
 frmodel/base/D2/frame/_frame_scaling.py
 frmodel/base/D2/frame/_frame_scoring.py
-frmodel/base/D2/frame/glcm.c
-frmodel/base/D2/frame/glcm.cp38-win_amd64.pyd
-frmodel/base/D2/frame/glcm.pyx
 frmodel/base/D2/frame/glcm2.c
 frmodel/base/D2/frame/glcm2.cp38-win_amd64.pyd
 frmodel/base/D2/frame/glcm2.pyx

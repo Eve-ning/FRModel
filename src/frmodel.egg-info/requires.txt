@@ -4,4 +4,4 @@ sklearn
 scikit-image
 tqdm
 plotly
-cv2
+opencv-python

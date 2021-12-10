@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="frmodel",
-    version="0.1.0",
+    version="0.1.2",
     author="Eve-ning",
     author_email="dev_evening@hotmail.com",
     description="The base package to support frmodel data processing",
