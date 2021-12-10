@@ -24,7 +24,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     setup_requires=["cython", "numpy"],
-    install_requires=["numpy", "seaborn", "sklearn", "scikit-image", "tqdm", "plotly", "cv2"],
+    install_requires=["numpy", "seaborn", "sklearn", "scikit-image", "tqdm", "plotly", "opencv-python"],
     python_requires='>=3.7',
     include_package_data=True,
 )
