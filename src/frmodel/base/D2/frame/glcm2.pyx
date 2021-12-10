@@ -36,19 +36,18 @@ cdef enum:
     VAR = 4
 
 cdef class CyGLCM:
-    cdef public unsigned int radius, diameter, D2, step_size, bins, invalid_value
+    cdef public np.uint64_t radius, diameter, D2, step_size, bins, invalid_value
     cdef public np.ndarray ar
     cdef public np.ndarray features
     cdef public np.ndarray glcm
     cdef public tuple pairs
-    cdef public float CORR_ERROR_VAL
     cdef public char verbose
 
     def __init__(self, np.ndarray[double, ndim=3] ar,
-                 unsigned int radius,
-                 unsigned int bins,
+                 np.uint64_t radius,
+                 np.uint64_t bins,
                  char verbose=True,
-                 unsigned int step_size=1,
+                 np.uint64_t step_size=1,
                  pairs=('N', 'W', 'NW', 'SW')):
         self.radius = radius
         self.step_size = step_size
@@ -56,7 +55,6 @@ cdef class CyGLCM:
         self.bins = bins
         self.invalid_value = bins + 1
         self.ar = ar
-        self.CORR_ERROR_VAL = -2
 
         # Dimensions of the features are
         # ROW, COL, CHN, GLCM_FEATURE
@@ -65,8 +63,8 @@ cdef class CyGLCM:
         if (ar.shape[1] - (step_size + radius) * 2) <= 0:
             raise ValueError
 
-        self.features = np.zeros([<unsigned int> ar.shape[0] - (step_size + radius) * 2,
-                                  <unsigned int> ar.shape[1] - (step_size + radius) * 2,
+        self.features = np.zeros([<np.uint64_t> ar.shape[0] - (step_size + radius) * 2,
+                                  <np.uint64_t> ar.shape[1] - (step_size + radius) * 2,
                                   ar.shape[2], 5],
                                  dtype=np.double)
         self.glcm = np.zeros([bins, bins], dtype=np.double)
@@ -81,11 +79,11 @@ cdef class CyGLCM:
         cdef np.ndarray[double, ndim=4] features = self.features
 
         # With an input of the ar(float), it binarizes and outputs to ar_bin
-        cdef np.ndarray[unsigned int, ndim=3] ar_bin = self._binarize(ar)
+        cdef np.ndarray[np.uint64_t, ndim=3] ar_bin = self._binarize(ar)
 
         # This is the number of channels of the array
         # E.g. if RGB, then 3.
-        cdef unsigned int chs = <unsigned int>ar_bin.shape[2]
+        cdef np.uint64_t chs = <np.uint64_t>ar_bin.shape[2]
 
         # This initializes the progress bar wrapper
         with tqdm(total=chs * len(self.pairs), disable=not self.verbose,
@@ -120,8 +118,8 @@ cdef class CyGLCM:
     @cython.boundscheck(True)
     @cython.wraparound(False)
     def _populate_glcm(self,
-                       np.ndarray[unsigned int, ndim=4] windows_i,
-                       np.ndarray[unsigned int, ndim=4] windows_j,
+                       np.ndarray[np.uint64_t, ndim=4] windows_i,
+                       np.ndarray[np.uint64_t, ndim=4] windows_j,
                        np.ndarray[double, ndim=3] features):
         """ For each window pair, this populates a full GLCM.
 
@@ -131,10 +129,10 @@ cdef class CyGLCM:
         :param windows_j: WR WC CR CC
         :return:
         """
-        cdef unsigned int wrs = <unsigned int>windows_i.shape[0]
-        cdef unsigned int wcs = <unsigned int>windows_i.shape[1]
-        cdef unsigned int wr = 0;
-        cdef unsigned int wc = 0;
+        cdef np.uint64_t wrs = <np.uint64_t>windows_i.shape[0]
+        cdef np.uint64_t wcs = <np.uint64_t>windows_i.shape[1]
+        cdef np.uint64_t wr = 0;
+        cdef np.uint64_t wc = 0;
 
         for wr in range(wrs):
             for wc in range(wcs):
@@ -146,8 +144,8 @@ cdef class CyGLCM:
     @cython.boundscheck(True)
     @cython.wraparound(False)
     cdef _populate_glcm_single(self,
-                              np.ndarray[unsigned int, ndim=2] window_i,
-                              np.ndarray[unsigned int, ndim=2] window_j,
+                              np.ndarray[np.uint64_t, ndim=2] window_i,
+                              np.ndarray[np.uint64_t, ndim=2] window_j,
                               np.ndarray[double, ndim=1] features):
         """
 
@@ -157,9 +155,9 @@ cdef class CyGLCM:
         :return:
         """
 
-        cdef unsigned int cr, cc
-        cdef unsigned int i = 0
-        cdef unsigned int j = 0
+        cdef np.uint64_t cr, cc
+        cdef np.uint64_t i = 0
+        cdef np.uint64_t j = 0
 
         cdef np.ndarray[double, ndim=2] glcm = self.glcm
         glcm[:] = 0
@@ -221,13 +219,13 @@ cdef class CyGLCM:
             # We do this so that we can detect invalid values.
             # Note that the values will span from [0, bin-1], so bin is an invalid value as we can check.
             b[nan_mask] = self.invalid_value
-            return b
+            return b.astype(np.uint)
         else:
             ar[np.isnan(ar)] = self.invalid_value
             return ar.astype(np.uint)
 
     @cython.boundscheck(True)
-    def _paired_windows(self, np.ndarray[unsigned int, ndim=2] ar):
+    def _paired_windows(self, np.ndarray[np.uint64_t, ndim=2] ar):
         """ Creates the pair wise windows.
 
         Note that this has an offset issue for corner values.

@@ -4,8 +4,10 @@ import numpy
 
 setup(
     name='frmodel',
-    ext_modules=cythonize("src/**/*.pyx", build_dir="cython-build",
+    ext_modules=cythonize("**/*.pyx",
+                          include_path=["src"],
+                          build_dir="cython-build",
                           annotate=True),
-    package_dir={'FRModel': ''},
+    package_dir={'src': ''},
     include_dirs=[numpy.get_include()]
 )
