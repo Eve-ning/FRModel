@@ -64,6 +64,7 @@ class _Frame2DScaling(ABC):
                            labels=self.labels)
 
     def scale_values_on_band(self: 'Frame2D'):
-        denom = self.data.sum(axis=-1)[..., np.newaxis]
-        return self.create(data=self.data / denom,
+        denom = np.nansum(self.data, axis=-1)[..., np.newaxis]
+        f = self.create(data=self.data / denom,
                            labels=self.labels)
+        return f

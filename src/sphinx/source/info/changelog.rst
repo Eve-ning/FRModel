@@ -13,6 +13,12 @@ ChangeLog
 - Add shorthands for non-GLCM and GLCM features
   - ``f.RED()``, ``f.GREEN()``,
   - ``f.CON('RED')``, ``f.COR(['RED, 'GREEN'])``
+- Fix many issues related to GLCM
+  - GLCM NaN Handling
+  - Step Size
+  - Allow Bins > 8
+  - Many More
+- Fix FRModel to be able to be used on PyPI
 
 -----
 0.0.6

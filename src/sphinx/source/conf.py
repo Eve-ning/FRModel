@@ -25,7 +25,7 @@ copyright = '2021, Eve-ning (John Chang)'
 author = 'Eve-ning'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.6'
+release = '0.1.0'
 
 
 # -- General configuration ---------------------------------------------------

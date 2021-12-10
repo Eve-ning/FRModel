@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Forest Recovery Modelling &mdash; frmodel 0.0.6 documentation</title>
+  <title>Forest Recovery Modelling &mdash; frmodel 0.1.0 documentation</title>
   
 
   
@@ -163,6 +163,31 @@
 </ul>
 </li>
 </ul>
+</div>
+<div class="section" id="installation-method-1-fork">
+<h2>Installation Method 1: Fork<a class="headerlink" href="#installation-method-1-fork" title="Permalink to this headline">¶</a></h2>
+<p>While not recommended for enterprise packages, I rarely update <cite>pip</cite> unless it’s required.</p>
+<p>To get the latest updates, just fork this repository.</p>
+<p>Note that you will need to build the <strong>Cython</strong> code, the <cite>c_setup.bat</cite> can be found in the root directory.</p>
+</div>
+<div class="section" id="installation-method-2-conda-pip">
+<h2>Installation Method 2: Conda + Pip<a class="headerlink" href="#installation-method-2-conda-pip" title="Permalink to this headline">¶</a></h2>
+<p><strong>Environment: Python 3.8 Anaconda</strong></p>
+<p>Only Anaconda works because of <cite>gdal</cite>. It will not work with <cite>pip venv</cite> unless you can install <cite>gdal</cite> on that.</p>
+<p>However, the package is only on <strong>PyPI</strong>, you can still do <cite>pip install frmodel</cite> and it will still work on Anaconda
+environments.</p>
+<p>When installing, you should receive these new packages, manually install them if missing.</p>
+<p><cite>gdal</cite> <strong>needs</strong> to be installed with <cite>conda install gdal -c conda-forge</cite>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">numpy</span>
+<span class="n">seaborn</span>
+<span class="n">sklearn</span>
+<span class="n">skimage</span>
+<span class="n">tqdm</span>
+<span class="n">plotly</span>
+<span class="n">opencv</span>
+<span class="n">gdal</span> <span class="o">*</span>
+</pre></div>
+</div>
 </div>
 </div>
 

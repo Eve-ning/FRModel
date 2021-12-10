@@ -69,6 +69,8 @@ class CONSTS:
             @staticmethod
             def CON(x): return CONSTS.CHN.GLCM._head("CON", x)
             @staticmethod
+            def HMG(x): return CONSTS.CHN.GLCM._head("HMG", x)
+            @staticmethod
             def COR(x): return CONSTS.CHN.GLCM._head("COR", x)
             @staticmethod
             def ASM(x): return CONSTS.CHN.GLCM._head("ASM", x)
