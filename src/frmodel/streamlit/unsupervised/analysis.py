@@ -28,6 +28,7 @@ def analysis(proc: Processing, settings: Settings):
     pbar = st.progress(0)
 
     relative_hist = st.checkbox("Relative Histogram", value=True)
+    combine_hist  = st.checkbox("Combined Histogram", value=True)
 
     # 2 Columns to show trees. The height of each entry should be consistent
     cols = st.columns(2)
@@ -47,20 +48,9 @@ def analysis(proc: Processing, settings: Settings):
         img = np.where(tree_bool_3, proc.img_color, np.nan)
 
         # This generates the RGB hist analysis pre glcm
-        bins = np.linspace(0, 255, settings.hist_bins)
-        df = pd.DataFrame(
-            np.stack(
-                [np.histogram(img[..., k].flatten(), bins=bins)[0] for k in range(img.shape[-1])]
-            ).T,
-            index=bins[:-1],
-            columns=[f'Channel {k}' for k in range(img.shape[-1])])
 
-        df = df.reset_index()
-        df = df.melt(id_vars=['index'])
-        c = alt.Chart(df, height=100).encode(x='index:Q', y='value:Q', color='variable:N').mark_line()
         tree_bool_color = np.where(tree_bool_3, proc.img_color, np.nan)
         cols[cols_ix % 2].image(np.where(tree_bool_3, proc.img_color, proc.img_color // 2), "Tree Image")
-        cols[cols_ix % 2].altair_chart(c, True)
 
         # This is just the boolean with only 1 channel
         # This is required for the findContours
@@ -84,13 +74,6 @@ def analysis(proc: Processing, settings: Settings):
         # Yield the smallest Frame2D from the bounding rect
         f_tree = Frame2D(tree_bool_color[y:y+h, x:x+w] / 255, [f'Channel {k}' for k in range(img.shape[-1])])
 
-        nan_img = np.isnan(f_tree.data)
-        st.text("NaN (%) : " + str(np.sum(nan_img) / nan_img.size * 100))
-
-        st.image(nan_img * 255)
-        st.text(np.nanmin(f_tree.data))
-        st.text(np.nanmax(f_tree.data))
-
         glcm_success = \
             f_tree.get_glcm(radius=settings.glcm_rad, bins=settings.glcm_bins, step_size=settings.step_size,
                         scale_on_bands=False)
@@ -99,26 +82,31 @@ def analysis(proc: Processing, settings: Settings):
             continue
         # Analyzes the GLCM
         data = f_tree.data
-        # for i in range(data.shape[-1] - 3):
-        #     cols[cols_ix%2].image(data[..., i],width=300)
+
         data = data.reshape([-1, data.shape[-1]])
         bins = np.linspace(0, 1, settings.hist_bins)
 
-        st.text(np.nanmin(data[..., 4]))
-
-        st.text(np.nanmax(data[..., 4]))
-        for k in range(6):
-            df_hist = pd.DataFrame(np.asarray([np.histogram(data[..., ch][~np.isnan(data[..., ch])], bins)[0] for ch in range(k*3, k*3 + 3)]).T,
-                             index=bins[:-1],
-                             columns=f_tree.channels[k*3: k*3 + 3])
-            # df_hist = df_hist.drop([c for c in df_hist.columns if "_" not in c], axis=1)
-
-            if relative_hist: df_hist /= df_hist.max()
-            df_hist = df_hist.reset_index()
-            df_hist = df_hist.melt(id_vars=['index'])
-            c = alt.Chart(df_hist, height=100).encode(x='index:Q', y='value:Q', color='variable:N')
+        def hist(df_hist_):
+            if relative_hist: df_hist_ /= df_hist_.max()
+            df_hist_ = df_hist_.reset_index()
+            df_hist_ = df_hist_.melt(id_vars=['index'])
+            c = alt.Chart(df_hist_, height=100).encode(x='index:Q', y='value:Q', color='variable:N')
             cols[cols_ix % 2].altair_chart(c.mark_line(), True)
-        # cols[cols_ix%2].caption(f"Relative Histogram of GLCM w/ Basebands")
+
+        if combine_hist:
+            df_hist = pd.DataFrame(np.asarray([np.histogram(data[..., ch], bins)[0]
+                                               for ch in range(data.shape[-1])]).T,
+                             index=bins[:-1],
+                             columns=f_tree.channels)
+            hist(df_hist)
+        else:
+            for k in range(6):
+                channels = data.shape[-1] // 6
+                df_hist = pd.DataFrame(np.asarray([np.histogram(data[..., ch], bins)[0]
+                                                   for ch in range(k * channels, k * channels + channels)]).T,
+                                 index=bins[:-1],
+                                 columns=f_tree.channels[k * channels: k * channels + channels])
+                hist(df_hist)
 
         # This is just for the fingerprinting, however, since the values are not bounded, it's kinda hard to get a
         # logical fingerprint
@@ -129,7 +117,6 @@ def analysis(proc: Processing, settings: Settings):
 
         pbar.progress(int(tree_ix / trees_len * 100))
         cols_ix += 1
-        break
 
     pbar.progress(100)
 

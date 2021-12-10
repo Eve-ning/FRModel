@@ -60,6 +60,11 @@ cdef class CyGLCM:
 
         # Dimensions of the features are
         # ROW, COL, CHN, GLCM_FEATURE
+        if (ar.shape[0] - (step_size + radius) * 2) <= 0:
+            raise ValueError
+        if (ar.shape[1] - (step_size + radius) * 2) <= 0:
+            raise ValueError
+
         self.features = np.zeros([<unsigned int> ar.shape[0] - (step_size + radius) * 2,
                                   <unsigned int> ar.shape[1] - (step_size + radius) * 2,
                                   ar.shape[2], 5],
