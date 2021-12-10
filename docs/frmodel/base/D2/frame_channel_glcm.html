@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Frame Gray Level Co-occurrence Matrix &mdash; frmodel 0.0.6 documentation</title>
+  <title>Frame Gray Level Co-occurrence Matrix &mdash; frmodel 0.1.0 documentation</title>
   
 
   
@@ -246,7 +246,7 @@ it works can be found in the research journal.</p>
 <p>This re-implements Wang Jifei’s Fast GLCM Script by adding the option of binarization.</p>
 <dl class="py method">
 <dt id="frmodel.base.D2.frame._frame_channel_fast_glcm._Frame2DChannelFastGLCM.get_glcm">
-<code class="sig-name descname"><span class="pre">get_glcm</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chns</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">Frame2D.CHN</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#frmodel.base.D2.frame._frame_channel_fast_glcm._Frame2DChannelFastGLCM.get_glcm" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_glcm</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chns</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">Frame2D.CHN</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pairs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">('N',</span> <span class="pre">'W',</span> <span class="pre">'NW',</span> <span class="pre">'SW')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_on_bands</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#frmodel.base.D2.frame._frame_channel_fast_glcm._Frame2DChannelFastGLCM.get_glcm" title="Permalink to this definition">¶</a></dt>
 <dd><p>This will get the GLCM statistics for this window</p>
 <p>Details on how GLCM works is shown on the wiki.</p>
 <dl class="field-list simple">
@@ -255,6 +255,7 @@ it works can be found in the research journal.</p>
 <li><p><strong>chns</strong> – Channels, can be also in strings.</p></li>
 <li><p><strong>radius</strong> – Radius of GLCM Window</p></li>
 <li><p><strong>bins</strong> – Bin size pre-processing of GLCM.</p></li>
+<li><p><strong>step_size</strong> – The step size of the window.</p></li>
 </ul>
 </dd>
 </dl>
