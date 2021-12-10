@@ -50,16 +50,13 @@ class _Frame2DChannelFastGLCM(ABC):
             # The np.asarray cast is to remove masking
             # self._data = np.nan_to_num(np.asarray(self.data))
 
-        try:
-            data = CyGLCM(self[..., chns].data,
-                          radius=radius,
-                          bins=bins,
-                          step_size=step_size,
-                          pairs=pairs).create_glcm()
+        data = CyGLCM(self[..., chns].data,
+                      radius=radius,
+                      bins=bins,
+                      step_size=step_size,
+                      pairs=pairs).create_glcm()
 
-            data = data.swapaxes(-2, -1).reshape([*data.shape[:2], -1])
-        except ValueError:
-            return None
+        data = data.swapaxes(-2, -1).reshape([*data.shape[:2], -1])
 
         if mask is not None:
             trim = radius + step_size
@@ -82,6 +79,9 @@ class _Frame2DChannelFastGLCM(ABC):
 
     def CON(self, chns: Union[List[str], str]):
         return self[:, :, [f"CON_{i}" for i in chns] if isinstance(chns, List) else f"CON_{chns}"]
+
+    def HMG(self, chns: Union[List[str], str]):
+        return self[:, :, [f"HMG_{i}" for i in chns] if isinstance(chns, List) else f"HMG_{chns}"]
 
     def COR(self, chns: Union[List[str], str]):
         return self[:, :, [f"COR_{i}" for i in chns] if isinstance(chns, List) else f"COR_{chns}"]

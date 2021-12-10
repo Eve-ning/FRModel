@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: frmodel
-Version: 0.1.2
+Version: 0.1.8
 Summary: The base package to support frmodel data processing
 Home-page: https://github.com/Eve-ning/frmodel
 Author: Eve-ning
@@ -25,15 +25,12 @@ Description: # FRModel
         **Python >= 3.7**
         
         ```
-        pillow
-        opencv
-        pandas
-        numpy
-        python
-        scipy
+        seaborn
+        sklearn
         scikit-image
-        scikit-learn
-        osgeo
+        tqdm
+        plotly
+        opencv
         ```
         
         # License
