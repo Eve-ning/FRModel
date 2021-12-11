@@ -1990,7 +1990,6 @@ static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_tqdm[] = "tqdm";
-static const char __pyx_k_uint[] = "uint";
 static const char __pyx_k_dtype[] = "dtype";
 static const char __pyx_k_enter[] = "__enter__";
 static const char __pyx_k_isnan[] = "isnan";
@@ -2019,6 +2018,7 @@ static const char __pyx_k_setstate[] = "__setstate__";
 static const char __pyx_k_pyx_state[] = "__pyx_state";
 static const char __pyx_k_reduce_ex[] = "__reduce_ex__";
 static const char __pyx_k_step_size[] = "step_size";
+static const char __pyx_k_ulonglong[] = "ulonglong";
 static const char __pyx_k_windows_i[] = "windows_i";
 static const char __pyx_k_windows_j[] = "windows_j";
 static const char __pyx_k_ValueError[] = "ValueError";
@@ -2118,7 +2118,7 @@ static PyObject *__pyx_kp_s_stringsource;
 static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_total;
 static PyObject *__pyx_n_s_tqdm;
-static PyObject *__pyx_n_s_uint;
+static PyObject *__pyx_n_s_ulonglong;
 static PyObject *__pyx_kp_u_unknown_dtype_code_in_numpy_pxd;
 static PyObject *__pyx_n_s_update;
 static PyObject *__pyx_n_s_verbose;
@@ -4456,7 +4456,7 @@ static PyArrayObject *__pyx_pf_3src_7frmodel_4base_2D2_5frame_5glcm2_6CyGLCM_6_b
  *         """ This binarizes the 2D image by its min-max """
  *         if ar.max() != 0:             # <<<<<<<<<<<<<<
  *             nan_mask = np.isnan(ar)
- *             b = (((ar - np.nanmin(ar)) / np.nanmax(ar)) * (self.bins - 1)).astype(np.uint)
+ *             b = (((ar - np.nanmin(ar)) / np.nanmax(ar)) * (self.bins - 1)).astype(np.ulonglong)
  */
   __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_ar), __pyx_n_s_max); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 216, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -4486,7 +4486,7 @@ static PyArrayObject *__pyx_pf_3src_7frmodel_4base_2D2_5frame_5glcm2_6CyGLCM_6_b
  *         """ This binarizes the 2D image by its min-max """
  *         if ar.max() != 0:
  *             nan_mask = np.isnan(ar)             # <<<<<<<<<<<<<<
- *             b = (((ar - np.nanmin(ar)) / np.nanmax(ar)) * (self.bins - 1)).astype(np.uint)
+ *             b = (((ar - np.nanmin(ar)) / np.nanmax(ar)) * (self.bins - 1)).astype(np.ulonglong)
  *             # We do this so that we can detect invalid values.
  */
     __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 217, __pyx_L1_error)
@@ -4515,7 +4515,7 @@ static PyArrayObject *__pyx_pf_3src_7frmodel_4base_2D2_5frame_5glcm2_6CyGLCM_6_b
     /* "src/frmodel/base/D2/frame/glcm2.pyx":218
  *         if ar.max() != 0:
  *             nan_mask = np.isnan(ar)
- *             b = (((ar - np.nanmin(ar)) / np.nanmax(ar)) * (self.bins - 1)).astype(np.uint)             # <<<<<<<<<<<<<<
+ *             b = (((ar - np.nanmin(ar)) / np.nanmax(ar)) * (self.bins - 1)).astype(np.ulonglong)             # <<<<<<<<<<<<<<
  *             # We do this so that we can detect invalid values.
  *             # Note that the values will span from [0, bin-1], so bin is an invalid value as we can check.
  */
@@ -4577,7 +4577,7 @@ static PyArrayObject *__pyx_pf_3src_7frmodel_4base_2D2_5frame_5glcm2_6CyGLCM_6_b
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 218, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_uint); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 218, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_ulonglong); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 218, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_5 = NULL;
@@ -4603,7 +4603,7 @@ static PyArrayObject *__pyx_pf_3src_7frmodel_4base_2D2_5frame_5glcm2_6CyGLCM_6_b
  *             # We do this so that we can detect invalid values.
  *             # Note that the values will span from [0, bin-1], so bin is an invalid value as we can check.
  *             b[nan_mask] = self.invalid_value             # <<<<<<<<<<<<<<
- *             return b.astype(np.uint)
+ *             return b.astype(np.ulonglong)
  *         else:
  */
     __pyx_t_2 = __Pyx_PyInt_From_npy_uint64(__pyx_v_self->invalid_value); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 221, __pyx_L1_error)
@@ -4614,7 +4614,7 @@ static PyArrayObject *__pyx_pf_3src_7frmodel_4base_2D2_5frame_5glcm2_6CyGLCM_6_b
     /* "src/frmodel/base/D2/frame/glcm2.pyx":222
  *             # Note that the values will span from [0, bin-1], so bin is an invalid value as we can check.
  *             b[nan_mask] = self.invalid_value
- *             return b.astype(np.uint)             # <<<<<<<<<<<<<<
+ *             return b.astype(np.ulonglong)             # <<<<<<<<<<<<<<
  *         else:
  *             ar[np.isnan(ar)] = self.invalid_value
  */
@@ -4623,7 +4623,7 @@ static PyArrayObject *__pyx_pf_3src_7frmodel_4base_2D2_5frame_5glcm2_6CyGLCM_6_b
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 222, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_uint); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 222, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_ulonglong); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 222, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_t_6 = NULL;
@@ -4652,15 +4652,15 @@ static PyArrayObject *__pyx_pf_3src_7frmodel_4base_2D2_5frame_5glcm2_6CyGLCM_6_b
  *         """ This binarizes the 2D image by its min-max """
  *         if ar.max() != 0:             # <<<<<<<<<<<<<<
  *             nan_mask = np.isnan(ar)
- *             b = (((ar - np.nanmin(ar)) / np.nanmax(ar)) * (self.bins - 1)).astype(np.uint)
+ *             b = (((ar - np.nanmin(ar)) / np.nanmax(ar)) * (self.bins - 1)).astype(np.ulonglong)
  */
   }
 
   /* "src/frmodel/base/D2/frame/glcm2.pyx":224
- *             return b.astype(np.uint)
+ *             return b.astype(np.ulonglong)
  *         else:
  *             ar[np.isnan(ar)] = self.invalid_value             # <<<<<<<<<<<<<<
- *             return ar.astype(np.uint)
+ *             return ar.astype(np.ulonglong)
  * 
  */
   /*else*/ {
@@ -4693,7 +4693,7 @@ static PyArrayObject *__pyx_pf_3src_7frmodel_4base_2D2_5frame_5glcm2_6CyGLCM_6_b
     /* "src/frmodel/base/D2/frame/glcm2.pyx":225
  *         else:
  *             ar[np.isnan(ar)] = self.invalid_value
- *             return ar.astype(np.uint)             # <<<<<<<<<<<<<<
+ *             return ar.astype(np.ulonglong)             # <<<<<<<<<<<<<<
  * 
  *     @cython.boundscheck(True)
  */
@@ -4702,7 +4702,7 @@ static PyArrayObject *__pyx_pf_3src_7frmodel_4base_2D2_5frame_5glcm2_6CyGLCM_6_b
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 225, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_uint); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 225, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_ulonglong); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 225, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_t_6 = NULL;
@@ -9078,7 +9078,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
   {&__pyx_n_s_total, __pyx_k_total, sizeof(__pyx_k_total), 0, 0, 1, 1},
   {&__pyx_n_s_tqdm, __pyx_k_tqdm, sizeof(__pyx_k_tqdm), 0, 0, 1, 1},
-  {&__pyx_n_s_uint, __pyx_k_uint, sizeof(__pyx_k_uint), 0, 0, 1, 1},
+  {&__pyx_n_s_ulonglong, __pyx_k_ulonglong, sizeof(__pyx_k_ulonglong), 0, 0, 1, 1},
   {&__pyx_kp_u_unknown_dtype_code_in_numpy_pxd, __pyx_k_unknown_dtype_code_in_numpy_pxd, sizeof(__pyx_k_unknown_dtype_code_in_numpy_pxd), 0, 1, 0, 0},
   {&__pyx_n_s_update, __pyx_k_update, sizeof(__pyx_k_update), 0, 0, 1, 1},
   {&__pyx_n_s_verbose, __pyx_k_verbose, sizeof(__pyx_k_verbose), 0, 0, 1, 1},
