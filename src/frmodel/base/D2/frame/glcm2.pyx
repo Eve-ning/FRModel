@@ -215,14 +215,14 @@ cdef class CyGLCM:
         """ This binarizes the 2D image by its min-max """
         if ar.max() != 0:
             nan_mask = np.isnan(ar)
-            b = (((ar - np.nanmin(ar)) / np.nanmax(ar)) * (self.bins - 1)).astype(np.uint)
+            b = (((ar - np.nanmin(ar)) / np.nanmax(ar)) * (self.bins - 1)).astype(np.ulonglong)
             # We do this so that we can detect invalid values.
             # Note that the values will span from [0, bin-1], so bin is an invalid value as we can check.
             b[nan_mask] = self.invalid_value
-            return b.astype(np.uint)
+            return b.astype(np.ulonglong)
         else:
             ar[np.isnan(ar)] = self.invalid_value
-            return ar.astype(np.uint)
+            return ar.astype(np.ulonglong)
 
     @cython.boundscheck(True)
     def _paired_windows(self, np.ndarray[np.uint64_t, ndim=2] ar):
