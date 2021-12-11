@@ -28,37 +28,37 @@ class _Frame2DChannelSpec(ABC):
 
     def _NDVI(self: 'Frame2D') -> np.ndarray:
         """ Normalized Difference Vegetation Index """
-        return (self.NIR().data - self.RED().data) / (self.NIR().data + self.RED().data)
+        return (self.NIR().data - self.NB_RED().data) / (self.NIR().data + self.NB_RED().data)
     def _BNDVI(self: 'Frame2D') -> np.ndarray:
-        """ Blue Normalized Difference Vegetation Index """
-        return (self.NIR().data - self.BLUE().data) / (self.NIR().data + self.BLUE().data)
+        """ NB_BLUE Normalized Difference Vegetation Index """
+        return (self.NIR().data - self.NB_BLUE().data) / (self.NIR().data + self.NB_BLUE().data)
     def _GNDVI(self: 'Frame2D') -> np.ndarray:
-        """ Green Normalized Difference Vegetation Index """
-        return (self.NIR().data - self.GREEN().data) / (self.NIR().data + self.GREEN().data)
+        """ NB_GREEN Normalized Difference Vegetation Index """
+        return (self.NIR().data - self.NB_GREEN().data) / (self.NIR().data + self.NB_GREEN().data)
     def _GARI(self: 'Frame2D') -> np.ndarray:
-        """ Green Atmospherically Resistant Vegetation Index """
-        b_r = self.BLUE().data - self.RED().data
-        return (self.NIR().data - (self.GREEN().data - b_r)) / (self.NIR().data - (self.GREEN().data + b_r))
+        """ NB_GREEN Atmospherically Resistant Vegetation Index """
+        b_r = self.NB_BLUE().data - self.NB_RED().data
+        return (self.NIR().data - (self.NB_GREEN().data - b_r)) / (self.NIR().data - (self.NB_GREEN().data + b_r))
     def _GLI(self: 'Frame2D') -> np.ndarray:
-        """ Green Leaf Index """
-        return (2 * self.GREEN().data - self.RED().data - self.BLUE().data) /\
-               (2 * self.GREEN().data + self.RED().data + self.BLUE().data)
+        """ NB_GREEN Leaf Index """
+        return (2 * self.NB_GREEN().data - self.NB_RED().data - self.NB_BLUE().data) /\
+               (2 * self.NB_GREEN().data + self.NB_RED().data + self.NB_BLUE().data)
     def _GBNDVI(self: 'Frame2D') -> np.ndarray:
-        """ Green Blue NDVI """
-        return (self.NIR().data - self.BLUE().data) / (self.NIR().data + self.BLUE().data)
+        """ NB_GREEN NB_BLUE NDVI """
+        return (self.NIR().data - self.NB_BLUE().data) / (self.NIR().data + self.NB_BLUE().data)
     def _GRNDVI(self: 'Frame2D') -> np.ndarray:
-        """ Green Red NDVI """
-        return (self.NIR().data - self.GREEN().data) / (self.NIR().data + self.GREEN().data)
+        """ NB_GREEN NB_RED NDVI """
+        return (self.NIR().data - self.NB_GREEN().data) / (self.NIR().data + self.NB_GREEN().data)
     def _NDRE(self: 'Frame2D') -> np.ndarray:
-        """ Normalized Difference Red Edge """
+        """ Normalized Difference NB_RED Edge """
         return (self.NIR().data - self.RED_EDGE().data) / (self.NIR().data + self.RED_EDGE().data)
     def _LCI(self: 'Frame2D') -> np.ndarray:
         """ Leaf Chlorophyll Index  """
-        return (self.NIR().data - self.RED_EDGE().data) / (self.NIR().data + self.RED().data)
+        return (self.NIR().data - self.RED_EDGE().data) / (self.NIR().data + self.NB_RED().data)
     def _MSAVI(self: 'Frame2D') -> np.ndarray:
         """ Modified Soil Adjusted Vegetation Index """
         aux = (2 * self.NIR().data + 1)
-        return (aux - np.sqrt(aux ** 2 - 8 * (self.NIR().data - self.RED().data))) / 2
+        return (aux - np.sqrt(aux ** 2 - 8 * (self.NIR().data - self.NB_RED().data))) / 2
     def _OSAVI(self: 'Frame2D') -> np.ndarray:
         """ Optimized Soil Adjusted Vegetation Index """
-        return (self.NIR().data - self.RED().data) / (self.NIR().data + self.RED().data + 0.16)
+        return (self.NIR().data - self.NB_RED().data) / (self.NIR().data + self.NB_RED().data + 0.16)

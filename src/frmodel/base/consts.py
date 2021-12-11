@@ -22,7 +22,11 @@ class CONSTS:
         RED         = "RED"
         GREEN       = "GREEN"
         BLUE        = "BLUE"
+        NB_RED      = "NB_RED"
+        NB_GREEN    = "NB_GREEN"
+        NB_BLUE     = "NB_BLUE"
         RGB         = (RED, GREEN, BLUE)
+        NB_RGB      = (NB_RED, NB_GREEN, NB_BLUE)
         HUE         = "HUE"
         SATURATION  = "SATURATION"
         VALUE       = "VALUE"
