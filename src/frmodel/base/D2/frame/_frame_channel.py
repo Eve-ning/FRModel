@@ -50,6 +50,9 @@ class _Frame2DChannel(_Frame2DChannelFastGLCM, _Frame2DChannelSpec):
     def RED(self: "Frame2D"):        return self[..., self.CHN.RED]
     def GREEN(self: "Frame2D"):      return self[..., self.CHN.GREEN]
     def BLUE(self: "Frame2D"):       return self[..., self.CHN.BLUE]
+    def NB_RED(self: "Frame2D"):     return self[..., self.CHN.NB_RED]
+    def NB_GREEN(self: "Frame2D"):   return self[..., self.CHN.NB_GREEN]
+    def NB_BLUE(self: "Frame2D"):    return self[..., self.CHN.NB_BLUE]
     def RGB(self: "Frame2D"):        return self[..., self.CHN.RGB]
     def RGBRENIR(self: "Frame2D"):   return self[..., self.CHN.RGBRENIR]
     def HUE(self: "Frame2D"):        return self._default(self.CHN.HUE, self._HSV, self.CHN.HSV)

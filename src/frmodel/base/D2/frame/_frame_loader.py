@@ -64,30 +64,45 @@ class _Frame2DLoader(ABC):
 
     @classmethod
     def from_image_spec(cls: 'Frame2D',
-                        file_path_red: str,
-                        file_path_green: str,
-                        file_path_blue: str,
-                        file_path_red_edge: str,
-                        file_path_nir: str,
+                        file_path_red: str = None,
+                        file_path_green: str = None,
+                        file_path_blue: str = None,
+                        file_path_red_edge: str = None,
+                        file_path_nir: str = None,
+                        file_path_rgb: str = None,
                         scale: float = 1.0) -> 'Frame2D':
 
-        labels = [*cls.CHN.RGB, cls.CHN.RED_EDGE, cls.CHN.NIR]
+        labels = []
+        data_files = []
 
-        data = np.stack(
-            [
-                tifffile.imread(file_path_red),
-                tifffile.imread(file_path_green),
-                tifffile.imread(file_path_blue),
-                tifffile.imread(file_path_red_edge),
-                tifffile.imread(file_path_nir),
-            ],
-            axis=-1
-        )
+        if file_path_red:
+            labels.append(cls.CHN.NB_RED)
+            data_files.append(tifffile.imread(file_path_red))
+        if file_path_green:
+            labels.append(cls.CHN.NB_GREEN)
+            data_files.append(tifffile.imread(file_path_green))
+        if file_path_blue:
+            labels.append(cls.CHN.NB_BLUE)
+            data_files.append(tifffile.imread(file_path_blue))
+        if file_path_red_edge:
+            labels.append(cls.CHN.RED_EDGE)
+            data_files.append(tifffile.imread(file_path_red_edge))
+        if file_path_nir:
+            labels.append(cls.CHN.NIR)
+            data_files.append(tifffile.imread(file_path_nir))
+        if file_path_rgb:
+            labels.extend(cls.CHN.RGB)
+            # The tiff file is RGBA (A = {0, 255})
+            ar = tifffile.imread(file_path_rgb)
+            ar, ar_mask = ar[...,:-1].astype(np.float32), ar[...,-1]
+            ar[ar_mask] = np.nan
+            data_files.extend([ar[...,0], ar[...,1], ar[...,2]])
+
+        data = np.stack(data_files, axis=-1)
 
         if scale != 1.0:
             data = resize(data, output_shape=[int(scale * data.shape[0]),
-                                              int(scale * data.shape[1])],
-                          order=0)
+                                              int(scale * data.shape[1])],order=0)
 
         return cls.create(data=np.ma.masked_invalid(data, copy=False), labels=labels)
 

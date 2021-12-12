@@ -23,7 +23,10 @@ def draw_trees(frame: Frame2D, trees: List[Tree], img_path: str):
     d.save(img_path)
 
 
-def load_spec(dir_path: str, scale: float = 1.0, bounds_path: str = "bounds.csv") -> Tuple[Frame2D, List[Tree]]:
+def load_spec(dir_path: str,
+              scale: float = 1.0,
+              bounds_path: str = "bounds.csv",
+              ignore_broadband: bool = True) -> Tuple[Frame2D, List[Tree]]:
     """ Quick loads a spec dataset. The required files must be present.
 
     Required:
@@ -38,7 +41,8 @@ def load_spec(dir_path: str, scale: float = 1.0, bounds_path: str = "bounds.csv"
        and os.path.isfile(dir_path + "result_Green.tif") \
        and os.path.isfile(dir_path + "result_Blue.tif") \
        and os.path.isfile(dir_path + "result_RedEdge.tif") \
-       and os.path.isfile(dir_path + "result_NIR.tif"),\
+       and os.path.isfile(dir_path + "result_NIR.tif")\
+       and os.path.isfile(dir_path + "result.tif"),\
         f"Some required files are missing, make sure that {dir_path}result_xxx.tif exists"
 
     f = Frame2D.from_image_spec(
@@ -47,6 +51,7 @@ def load_spec(dir_path: str, scale: float = 1.0, bounds_path: str = "bounds.csv"
         dir_path + "result_Blue.tif",
         dir_path + "result_RedEdge.tif",
         dir_path + "result_NIR.tif",
+        None if ignore_broadband else dir_path + "result.tif",
         scale=scale
     )
 
