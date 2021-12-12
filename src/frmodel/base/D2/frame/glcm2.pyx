@@ -19,15 +19,12 @@
 import numpy as np
 cimport numpy as np
 cimport cython
-from cython.parallel import prange, parallel
 
 from skimage.util import view_as_windows
 
 from tqdm import tqdm
 from libc.math cimport sqrt
-from libc.math cimport isnan
 
-from libc.math cimport NAN
 
 
 cdef enum:
@@ -136,11 +133,10 @@ cdef class CyGLCM:
         cdef np.uint16_t wr = 0;
         cdef np.uint16_t wc = 0;
 
-        cdef np.ndarray[float, ndim=2] glcm = self.glcm.copy()
-        for wr in prange(wrs, nogil=True):
-            for wc in prange(wcs):
+        for wr in range(wrs):
+            for wc in range(wcs):
                 # We want to create the glcm and put into features[wr, wc]
-                self._populate_glcm_single(windows_i[wr, wc], windows_j[wr, wc], features[wr, wc], glcm)
+                self._populate_glcm_single(windows_i[wr, wc], windows_j[wr, wc], features[wr, wc])
 
     @cython.cdivision(True)
     @cython.boundscheck(False)
@@ -149,7 +145,7 @@ cdef class CyGLCM:
                               np.ndarray[np.uint16_t, ndim=2] window_i,
                               np.ndarray[np.uint16_t, ndim=2] window_j,
                               np.ndarray[float, ndim=1] features,
-                              np.ndarray[float, ndim=2] glcm) nogil:
+                              ):
         """
 
         :param window_i: CR CC
@@ -162,6 +158,8 @@ cdef class CyGLCM:
         cdef np.uint16_t i = 0
         cdef np.uint16_t j = 0
 
+        cdef np.ndarray[float, ndim=2] glcm = self.glcm
+        glcm[:] = 0
 
         cdef float mean_i = 0
         cdef float mean_j = 0
@@ -171,13 +169,8 @@ cdef class CyGLCM:
         cdef float corr_num = 0
         cdef float corr_den = 0
 
-
-        for cr in prange(self.bins):
-            for cc in prange(self.bins):
-                glcm[cr, cc] = 0
-
-        for cr in prange(self.diameter):
-            for cc in prange(self.diameter):
+        for cr in range(self.diameter):
+            for cc in range(self.diameter):
                 i = window_i[cr, cc]
                 j = window_j[cr, cc]
 
@@ -193,10 +186,10 @@ cdef class CyGLCM:
         mean_i /= self.diameter ** 2
         mean_j /= self.diameter ** 2
 
-        # For each cell in the GLCM
+            # For each cell in the GLCM
 
-        for cr in prange(self.bins):
-            for cc in prange(self.bins):
+        for cr in range(self.bins):
+            for cc in range(self.bins):
                 features[HOMOGENEITY]   += <float>(glcm[cr, cc] / (1 + <float>(i - j) ** 2))
                 features[ASM]           += glcm[cr, cc] ** 2
                 var_i += glcm[cr, cc] * (<float> cr - mean_i) ** 2
@@ -205,8 +198,8 @@ cdef class CyGLCM:
         std = <float> (sqrt(var_i) * sqrt(var_j))
 
         if std != 0:
-            for cr in prange(self.bins):
-                for cc in prange(self.bins):
+            for cr in range(self.bins):
+                for cc in range(self.bins):
                     features[CORRELATION] += glcm[cr, cc] * (<float> cr - mean_i) * (<float> cc - mean_j) / std
 
         features[MEAN] += <float> ((mean_i + mean_j) / 2)
