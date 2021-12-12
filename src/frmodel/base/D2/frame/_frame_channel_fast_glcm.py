@@ -39,7 +39,7 @@ class _Frame2DChannelFastGLCM(ABC):
         # FAST GLCM
         chns = chns if chns else list(self.labels.keys())
 
-        self._data = self.data.astype(np.double)
+        self._data = self.data.astype(np.single)
 
         if scale_on_bands:
             self._data = self.scale_values_on_band().data
