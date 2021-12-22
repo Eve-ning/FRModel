@@ -3,6 +3,9 @@
 venv/
 __pycache__/
 
+src/dist/*
+src/cython-build/*
+
 */build/*
 # Scratch File
 .scratch/
