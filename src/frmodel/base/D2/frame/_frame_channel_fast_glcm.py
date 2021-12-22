@@ -65,6 +65,7 @@ class _Frame2DChannelFastGLCM(ABC):
         labels = []
 
         labels.extend(CONSTS.CHN.GLCM.HMG( list(self._util_flatten(chns))))
+        labels.extend(CONSTS.CHN.GLCM.CON( list(self._util_flatten(chns))))
         labels.extend(CONSTS.CHN.GLCM.COR( list(self._util_flatten(chns))))
         labels.extend(CONSTS.CHN.GLCM.ASM( list(self._util_flatten(chns))))
         labels.extend(CONSTS.CHN.GLCM.MEAN(list(self._util_flatten(chns))))

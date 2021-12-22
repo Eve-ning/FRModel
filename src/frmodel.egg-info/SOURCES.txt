@@ -25,7 +25,6 @@ frmodel/base/D2/frame/_frame_partition.py
 frmodel/base/D2/frame/_frame_plot.py
 frmodel/base/D2/frame/_frame_scaling.py
 frmodel/base/D2/frame/_frame_scoring.py
-frmodel/base/D2/frame/glcm.cp38-win_amd64.pyd
 frmodel/base/D2/frame/glcm2.c
 frmodel/base/D2/frame/glcm2.cp38-win_amd64.pyd
 frmodel/base/D2/frame/glcm2.pyx
