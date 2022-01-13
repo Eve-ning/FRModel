@@ -6,7 +6,7 @@ import numpy as np
 import utm
 from PIL import Image
 from PIL import ImageDraw
-from scipy.interpolate import CloughTocher2DInterpolator, griddata
+from scipy.interpolate import CloughTocher2DInterpolator, griddata, LinearNDInterpolator
 from scipy.spatial import ConvexHull, Delaunay
 from sklearn.impute import KNNImputer
 
@@ -108,7 +108,8 @@ class _Cloud3DFrame(ABC):
         #                             outline=1, fill=1)
         # mask = np.asarray(img)
 
-        interp_z = CloughTocher2DInterpolator(list(zip(x, y)), z, rescale=True, tol=0.1)
+        # interp_z = CloughTocher2DInterpolator(list(zip(x, y)), z, rescale=True)
+        interp_z = LinearNDInterpolator(list(zip(x, y)), z, rescale=True)
         Z = interp_z(XM, YM)
         Z = np.where(Z < 0, 0, Z)
         Z = np.nan_to_num(Z)
