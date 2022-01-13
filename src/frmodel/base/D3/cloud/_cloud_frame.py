@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
-import gdal
 import numpy as np
 import utm
+from PIL import Image
 from scipy.interpolate import CloughTocher2DInterpolator
 
 from frmodel.base.D2 import Frame2D
@@ -11,34 +11,38 @@ from frmodel.base.D2 import Frame2D
 if TYPE_CHECKING:
     from frmodel.base.D3 import Cloud3D
 
+TAG_X_SIZE = 256
+TAG_Y_SIZE = 257
+
 class _Cloud3DFrame(ABC):
-    
+
     @abstractmethod
     def data(self, sample_size=None, transformed=True) -> np.ndarray:
         ...
 
     @staticmethod
     def _geotiff_to_latlong_ranges(geotiff_path:str) -> tuple:
-        ds = gdal.Open(geotiff_path)
+        im = Image.open(geotiff_path)
+        tag = im.tag
+        width = tag[TAG_X_SIZE][0]
+        height = tag[TAG_Y_SIZE][0]
 
-        width = ds.RasterXSize
-        height = ds.RasterYSize
-        gt = ds.GetGeoTransform()
+        # This is the GeoTransform gathered from GDAL
+        # Note that the 3rd and 5th are zeros if the tiff is a north-up image (assumption)
+        gt = (tag[33922][3], tag[33550][0], 0, tag[33922][4], 0, -tag[33550][1])
 
         d2latmin, d2longmin = gt[3] + width * gt[4] + height * gt[5], gt[0]
         d2latmax, d2longmax = gt[3], gt[0] + width * gt[1] + height * gt[2]
-        return (d2latmin, d2latmax), (d2longmin, d2longmax)
+        return (height, width), (d2latmin, d2latmax), (d2longmin, d2longmax)
 
     def to_frame(self: 'Cloud3D',
                  geotiff_path: str,
-                 shape: tuple,
                  samples: int = 100000):
         """ Converts this Cloud3D into a 2D Frame
 
         This algorithm uses geotiff metadata to fit the Cloud data onto it.
 
         :param geotiff_path: A Geo-referencable geotiff path
-        :param shape: The expected shape, this is usually specified by the Frame2D.from_image_spec
         :param samples: The number of cloud samples to randomly sample for interpolation.
         :return:
         """
@@ -48,7 +52,7 @@ class _Cloud3DFrame(ABC):
         utm_max = np.asarray([*self.f.header.max])[..., np.newaxis]
 
         # Get the expected lat long ranges from our GEOTiff
-        lat_range, lng_range = self._geotiff_to_latlong_ranges(geotiff_path)
+        shape, lat_range, lng_range = self._geotiff_to_latlong_ranges(geotiff_path)
 
         # For some odd reason, the UTM data isn't scaled correctly to the provided min-max
         # in the header. The incorrect scaled data is prev.
