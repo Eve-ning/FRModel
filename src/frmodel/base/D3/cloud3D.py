@@ -5,27 +5,26 @@ from dataclasses import dataclass
 from typing import Union
 from xml.etree import ElementTree
 
-import gdal
+import laspy
 import numpy as np
 import pandas as pd
 import utm
-from laspy.file import File
+from laspy import LasData, LasHeader
 from frmodel.base.D3.cloud._cloud_frame import _Cloud3DFrame
 
 
 @dataclass
 class Cloud3D(_Cloud3DFrame):
-
-    f: File
+    f: LasData
 
     @staticmethod
-    def from_las(las_path:str) -> Cloud3D:
+    def from_las(las_path: str) -> Cloud3D:
         """ Loads a Cloud3D from a LAS file
 
         :param las_path: Path to a las file
         :return: A Cloud3D instance
         """
-        return Cloud3D(File(las_path, mode='r'))
+        return Cloud3D(laspy.read(las_path))
 
     def to_latlong(self):
         utm_ = np.vstack([self.f.X, self.f.Y, self.f.Z]).astype(np.float)
@@ -53,8 +52,8 @@ class Cloud3D(_Cloud3DFrame):
         if isinstance(sample_size, float):
             sample_size = int(len(self.f.points) * sample_size)
 
-        data = np.random.choice(self.f.points, sample_size, False) if sample_size else self.f.points
-        data2 = pd.DataFrame(data['point'][['X', 'Y', 'Z', 'red', 'green', 'blue']]).to_numpy()
+        data = np.random.choice(self.f.points.array, sample_size, False) if sample_size else self.f.points
+        data2 = pd.DataFrame(data[['X', 'Y', 'Z', 'red', 'green', 'blue']]).to_numpy()
         if transformed: data2 = Cloud3D._transform_data(data2, self.header)
         return deepcopy(data2)
 
@@ -76,56 +75,51 @@ class Cloud3D(_Cloud3DFrame):
     def header(self):
         return self.f.header
 
-    def close(self):
-        self.f.close()
+    # @staticmethod
+    # def get_geo_info(geotiff_path: str):
+    #     ds = gdal.Open(geotiff_path)
+    #     xoffset, px_w, rot1, yoffset, px_h, rot2 = ds.GetGeoTransform()
+    #
+    #     return dict(xoffset=xoffset, px_w=px_w, rot1=rot1,
+    #                 yoffset=yoffset, px_h=px_h, rot2=rot2)
 
-    @staticmethod
-    def get_geo_info(geotiff_path: str):
-        ds = gdal.Open(geotiff_path)
-        xoffset, px_w, rot1, yoffset, px_h, rot2 = ds.GetGeoTransform()
-
-        return dict(xoffset=xoffset, px_w=px_w, rot1=rot1,
-                    yoffset=yoffset, px_h=px_h, rot2=rot2)
-
-    def write_las(self, file_name: str, alt_header:File = None):
+    def write_las(self, file_name: str, alt_header: LasHeader = None):
         """ Writes the current points in a las format
 
         Header used will be the same as the one provided during loading otherwise given.
         """
 
-        f = File(file_name, mode='w', header=alt_header if alt_header else self.header)
-        data = self.data(transformed=False)
+        with laspy.open(file_name, mode="w", header=alt_header if alt_header else self.header) as f:
+            data = self.data(transformed=False)
 
-        f.X = data[:, 0]
-        f.Y = data[:, 1]
-        f.Z = data[:, 2]
+            f.X = data[:, 0]
+            f.Y = data[:, 1]
+            f.Z = data[:, 2]
 
-        f.Red   = data[:, 3]
-        f.Green = data[:, 4]
-        f.Blue  = data[:, 5]
+            f.Red = data[:, 3]
+            f.Green = data[:, 4]
+            f.Blue = data[:, 5]
 
-        f.close()
-        
     @staticmethod
-    def _transform_data(data, header: File):
+    def _transform_data(data, header: LasHeader):
         """ Transforms data suitable for usage, from LAS format """
         return np.hstack([Cloud3D._transform_xyz(data[:, :3], header),
                           Cloud3D._transform_rgb(data[:, 3:])])
 
     @staticmethod
-    def _inv_transform_data(data, header: File):
+    def _inv_transform_data(data, header: LasHeader):
         """ Transforms data suitable for writing """
         return np.hstack([Cloud3D._inv_transform_xyz(data[:, :3], header),
                           Cloud3D._inv_transform_rgb(data[:, 3:])])
 
     @staticmethod
-    def _transform_xyz(xyz, header: File):
+    def _transform_xyz(xyz, header: LasHeader):
         """ Transforms XYZ according to the header information
 
         This transforms XYZ into a workable, intended format for usage.
         """
         # noinspection PyUnresolvedReferences
-        return xyz + [o / s for o, s in zip(header.offset, header.scale)]
+        return xyz + [o / s for o, s in zip(header.offsets, header.scales)]
 
     @staticmethod
     def _transform_rgb(rgb):
@@ -136,7 +130,7 @@ class Cloud3D(_Cloud3DFrame):
         return rgb // (2 ** 8)
 
     @staticmethod
-    def _inv_transform_xyz(xyz, header: File):
+    def _inv_transform_xyz(xyz, header: LasHeader):
         """ Inverse Transforms XYZ according to the header information
 
         This inverse transforms XYZ according to header, intended for writing
