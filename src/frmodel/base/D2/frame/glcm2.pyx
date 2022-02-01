@@ -33,6 +33,7 @@ cdef enum:
     ASM = 2
     MEAN = 3
     VAR = 4
+    CONTRAST = 5
 
 cdef class CyGLCM:
     cdef public np.uint16_t radius, diameter, D2, step_size, bins, invalid_value
@@ -42,12 +43,15 @@ cdef class CyGLCM:
     cdef public tuple pairs
     cdef public char verbose
 
-    def __init__(self, np.ndarray[float, ndim=3] ar,
-                 np.uint16_t radius,
-                 np.uint16_t bins,
-                 char verbose=True,
-                 np.uint16_t step_size=1,
-                 pairs=('N', 'W', 'NW', 'SW')):
+    def __init__(
+            self,
+            np.ndarray[float, ndim=3] ar,
+            np.uint16_t radius,
+            np.uint16_t bins,
+            char verbose=True,
+            np.uint16_t step_size=1,
+            pairs=('N', 'W', 'NW', 'SW')
+    ):
         self.radius = radius
         self.step_size = step_size
         self.diameter = radius * 2 + 1
@@ -62,10 +66,13 @@ cdef class CyGLCM:
         if (ar.shape[1] - (step_size + radius) * 2) <= 0:
             raise ValueError
 
-        self.features = np.zeros([<np.uint16_t> ar.shape[0] - (step_size + radius) * 2,
-                                  <np.uint16_t> ar.shape[1] - (step_size + radius) * 2,
-                                  ar.shape[2], 5],
-                                 dtype=np.single)
+        self.features = np.zeros([
+            <np.uint16_t> ar.shape[0] - (step_size + radius) * 2,
+            <np.uint16_t> ar.shape[1] - (step_size + radius) * 2,
+            ar.shape[2], 5],
+            dtype=np.single
+        )
+
         self.glcm = np.zeros([bins, bins], dtype=np.single)
         self.pairs = pairs
         self.verbose = verbose
@@ -82,7 +89,7 @@ cdef class CyGLCM:
 
         # This is the number of channels of the array
         # E.g. if RGB, then 3.
-        cdef np.uint16_t chs = <np.uint16_t>ar_bin.shape[2]
+        cdef np.uint16_t chs = <np.uint16_t> ar_bin.shape[2]
 
         # This initializes the progress bar wrapper
         with tqdm(total=chs * len(self.pairs), disable=not self.verbose,
@@ -100,26 +107,31 @@ cdef class CyGLCM:
                 for direction in directions:
                     # Each pair is a tuple
                     # Tuple of 2 offset images for GLCM calculation.
-                    self._populate_glcm(direction[0], direction[1], features[:,:,ch,:])
+                    self._populate_glcm(direction[0], direction[1],
+                                        features[:, :, ch, :])
                     pbar.update()
 
         # The following statements will rescale the features to [0,1]
         # To fully understand why I do this, refer to my research journal.
-        # features[..., HOMOGENEITY]    /= (self.bins - 1) ** 2 # Don't think scaling is needed.
+        features[..., CONTRAST] /= (
+                                           self.bins - 1) ** 2  # Don't think scaling is needed.
 
         features[features == 0] = np.nan
-        features[..., MEAN]       /= self.bins - 1
-        features[..., VAR]        /= (self.bins - 1) ** 2
-        features[..., CORRELATION] = (features[..., CORRELATION] + len(self.pairs)) / 2
+        features[..., MEAN] /= self.bins - 1
+        features[..., VAR] /= (self.bins - 1) ** 2
+        features[..., CORRELATION] = (features[..., CORRELATION] + len(
+            self.pairs)) / 2
         features /= len(self.pairs)
         return features
 
     @cython.boundscheck(False)
     @cython.wraparound(False)
-    cdef void _populate_glcm(self,
-                       np.ndarray[np.uint16_t, ndim=4] windows_i,
-                       np.ndarray[np.uint16_t, ndim=4] windows_j,
-                       np.ndarray[float, ndim=3] features):
+    cdef void _populate_glcm(
+            self,
+            np.ndarray[np.uint16_t, ndim=4] windows_i,
+            np.ndarray[np.uint16_t, ndim=4] windows_j,
+            np.ndarray[float, ndim=3] features
+    ):
         """ For each window pair, this populates a full GLCM.
 
         The ar would be WR, WC, CR, CC
@@ -128,24 +140,26 @@ cdef class CyGLCM:
         :param windows_j: WR WC CR CC
         :return:
         """
-        cdef np.uint16_t wrs = <np.uint16_t>windows_i.shape[0]
-        cdef np.uint16_t wcs = <np.uint16_t>windows_i.shape[1]
+        cdef np.uint16_t wrs = <np.uint16_t> windows_i.shape[0]
+        cdef np.uint16_t wcs = <np.uint16_t> windows_i.shape[1]
         cdef np.uint16_t wr = 0;
         cdef np.uint16_t wc = 0;
 
         for wr in range(wrs):
             for wc in range(wcs):
                 # We want to create the glcm and put into features[wr, wc]
-                self._populate_glcm_single(windows_i[wr, wc], windows_j[wr, wc], features[wr, wc])
+                self._populate_glcm_single(windows_i[wr, wc],
+                                           windows_j[wr, wc], features[wr, wc])
 
     @cython.cdivision(True)
     @cython.boundscheck(False)
     @cython.wraparound(False)
-    cdef void _populate_glcm_single(self,
-                              np.ndarray[np.uint16_t, ndim=2] window_i,
-                              np.ndarray[np.uint16_t, ndim=2] window_j,
-                              np.ndarray[float, ndim=1] features,
-                              ):
+    cdef void _populate_glcm_single(
+            self,
+            np.ndarray[np.uint16_t, ndim=2] window_i,
+            np.ndarray[np.uint16_t, ndim=2] window_j,
+            np.ndarray[float, ndim=1] features,
+    ):
         """
 
         :param window_i: CR CC
@@ -180,18 +194,20 @@ cdef class CyGLCM:
 
                 mean_i += <float> i
                 mean_j += <float> j
-                glcm[i, j] += <float> (1 / (2 * <float>(self.diameter ** 2)))
-                glcm[j, i] += <float> (1 / (2 * <float>(self.diameter ** 2))) # Symmetric for ASM.
+                glcm[i, j] += <float> (1 / (2 * <float> (self.diameter ** 2)))
+                glcm[j, i] += <float> (1 / (2 * <float> (
+                        self.diameter ** 2)))  # Symmetric for ASM.
 
         mean_i /= self.diameter ** 2
         mean_j /= self.diameter ** 2
 
-            # For each cell in the GLCM
+        # For each cell in the GLCM
 
         for cr in range(self.bins):
             for cc in range(self.bins):
-                features[HOMOGENEITY]   += <float>(glcm[cr, cc] / (1 + <float>(i - j) ** 2))
-                features[ASM]           += glcm[cr, cc] ** 2
+                features[HOMOGENEITY] += <float> (
+                        glcm[cr, cc] / (1 + <float> (i - j) ** 2))
+                features[ASM] += glcm[cr, cc] ** 2
                 var_i += glcm[cr, cc] * (<float> cr - mean_i) ** 2
                 var_j += glcm[cr, cc] * (<float> cc - mean_j) ** 2
 
@@ -200,19 +216,24 @@ cdef class CyGLCM:
         if std != 0:
             for cr in range(self.bins):
                 for cc in range(self.bins):
-                    features[CORRELATION] += glcm[cr, cc] * (<float> cr - mean_i) * (<float> cc - mean_j) / std
+                    features[CORRELATION] += glcm[cr, cc] * (
+                            <float> cr - mean_i) * (
+                                                     <float> cc - mean_j) / std
 
         features[MEAN] += <float> ((mean_i + mean_j) / 2)
         features[VAR] += <float> ((var_i + var_j) / 2)
 
-
     @cython.boundscheck(False)
     @cython.wraparound(False)
-    cdef np.ndarray[np.uint16_t, ndim=3] _binarize(self, np.ndarray[float, ndim=3] ar):
+    cdef np.ndarray[np.uint16_t, ndim=3] _binarize(
+            self,
+            np.ndarray[float, ndim=3] ar
+    ):
         """ This binarizes the 2D image by its min-max """
         if ar.max() != 0:
             nan_mask = np.isnan(ar)
-            b = (((ar - np.nanmin(ar)) / np.nanmax(ar)) * (self.bins - 1)).astype(np.ushort)
+            b = (((ar - np.nanmin(ar)) / np.nanmax(ar)) * (
+                    self.bins - 1)).astype(np.ushort)
             # We do this so that we can detect invalid values.
             # Note that the values will span from [0, bin-1], so bin is an invalid value as we can check.
             b[nan_mask] = self.invalid_value
@@ -222,7 +243,10 @@ cdef class CyGLCM:
             return ar.astype(np.ushort)
 
     @cython.boundscheck(False)
-    cdef _paired_windows(self, np.ndarray[np.uint16_t, ndim=2] ar):
+    cdef _paired_windows(
+            self,
+            np.ndarray[np.uint16_t, ndim=2] ar
+    ):
         """ Creates the pair wise windows.
 
         Note that this has an offset issue for corner values.
@@ -287,11 +311,14 @@ cdef class CyGLCM:
         cdef int s = self.step_size
         original = ar_w[s:-s, s:-s]
 
-
-        if ("N"  in self.pairs) or ("S"  in self.pairs): pairs.append((original, ar_w[:-s-s, s:-s]))
-        if ("W"  in self.pairs) or ("E"  in self.pairs): pairs.append((original, ar_w[s:-s, s+s:]))
-        if ("NW" in self.pairs) or ("SE" in self.pairs): pairs.append((original, ar_w[:-s-s, s+s:]))
-        if ("SW" in self.pairs) or ("NE" in self.pairs): pairs.append((original, ar_w[s+s:, s+s:]))
+        if ("N" in self.pairs) or ("S" in self.pairs): pairs.append(
+            (original, ar_w[:-s - s, s:-s]))
+        if ("W" in self.pairs) or ("E" in self.pairs): pairs.append(
+            (original, ar_w[s:-s, s + s:]))
+        if ("NW" in self.pairs) or ("SE" in self.pairs): pairs.append(
+            (original, ar_w[:-s - s, s + s:]))
+        if ("SW" in self.pairs) or ("NE" in self.pairs): pairs.append(
+            (original, ar_w[s + s:, s + s:]))
 
         return pairs
 
