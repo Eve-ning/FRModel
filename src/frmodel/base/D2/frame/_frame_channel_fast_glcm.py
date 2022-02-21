@@ -69,6 +69,7 @@ class _Frame2DChannelFastGLCM(ABC):
         labels.extend(CONSTS.CHN.GLCM.ASM( list(self._util_flatten(chns))))
         labels.extend(CONSTS.CHN.GLCM.MEAN(list(self._util_flatten(chns))))
         labels.extend(CONSTS.CHN.GLCM.VAR( list(self._util_flatten(chns))))
+        labels.extend(CONSTS.CHN.GLCM.CON( list(self._util_flatten(chns))))
 
         self._data = self.crop_glcm(radius, glcm_by=step_size).data
         t = self.append(data, labels=labels)
