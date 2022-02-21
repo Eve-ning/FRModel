@@ -26,7 +26,6 @@ from tqdm import tqdm
 from libc.math cimport sqrt
 
 
-
 cdef enum:
     HOMOGENEITY = 0
     CORRELATION = 1
@@ -69,7 +68,7 @@ cdef class CyGLCM:
         self.features = np.zeros([
             <np.uint16_t> ar.shape[0] - (step_size + radius) * 2,
             <np.uint16_t> ar.shape[1] - (step_size + radius) * 2,
-            ar.shape[2], 5],
+            ar.shape[2], 6],
             dtype=np.single
         )
 
@@ -80,13 +79,26 @@ cdef class CyGLCM:
     @cython.boundscheck(False)
     @cython.wraparound(False)
     def create_glcm(self):
+        """ This is the entry point to create the GLCM
+
+        1) Binarize the image into self.bins
+        2) Create pairs in directions
+        3) For each pair, populate the GLCM
+        4) Calculate feature from GLCM
+        5) Add onto self.features
+        6) Repeat (2)
+        7) Divide self.features by number of pairs
+        8) Scale features to [0,1]
+
+        :return:
+        """
         # This creates the mem_views
         cdef np.ndarray[float, ndim=3] ar = self.ar
         cdef np.ndarray[float, ndim=4] features = self.features
 
         # With an input of the ar(float), it binarizes and outputs to ar_bin
         cdef np.ndarray[np.uint16_t, ndim=3] ar_bin = self._binarize(ar)
-
+        ar_bin = np.nan_to_num(ar_bin, nan=self.invalid_value)
         # This is the number of channels of the array
         # E.g. if RGB, then 3.
         cdef np.uint16_t chs = <np.uint16_t> ar_bin.shape[2]
@@ -107,20 +119,19 @@ cdef class CyGLCM:
                 for direction in directions:
                     # Each pair is a tuple
                     # Tuple of 2 offset images for GLCM calculation.
-                    self._populate_glcm(direction[0], direction[1],
-                                        features[:, :, ch, :])
+                    self._populate_glcm(
+                        windows_i=direction[0],
+                        windows_j=direction[1],
+                        features=features[:, :, ch, :]
+                    )
                     pbar.update()
 
         # The following statements will rescale the features to [0,1]
         # To fully understand why I do this, refer to my research journal.
-        features[..., CONTRAST] /= (
-                                           self.bins - 1) ** 2  # Don't think scaling is needed.
-
-        features[features == 0] = np.nan
+        features[..., CONTRAST] /= (self.bins - 1) ** 2
         features[..., MEAN] /= self.bins - 1
         features[..., VAR] /= (self.bins - 1) ** 2
-        features[..., CORRELATION] = (features[..., CORRELATION] + len(
-            self.pairs)) / 2
+        features[..., CORRELATION] = (features[..., CORRELATION] + len(self.pairs)) / 2
         features /= len(self.pairs)
         return features
 
@@ -148,8 +159,11 @@ cdef class CyGLCM:
         for wr in range(wrs):
             for wc in range(wcs):
                 # We want to create the glcm and put into features[wr, wc]
-                self._populate_glcm_single(windows_i[wr, wc],
-                                           windows_j[wr, wc], features[wr, wc])
+                self._populate_glcm_single(
+                    window_i=windows_i[wr, wc],
+                    window_j=windows_j[wr, wc],
+                    features=features[wr, wc]
+                )
 
     @cython.cdivision(True)
     @cython.boundscheck(False)
@@ -160,7 +174,7 @@ cdef class CyGLCM:
             np.ndarray[np.uint16_t, ndim=2] window_j,
             np.ndarray[float, ndim=1] features,
     ):
-        """
+        """ Populates a single cell of features using 1 GLCM.
 
         :param window_i: CR CC
         :param window_j: CR CC
@@ -194,9 +208,9 @@ cdef class CyGLCM:
 
                 mean_i += <float> i
                 mean_j += <float> j
+                # Symmetric for ASM.
                 glcm[i, j] += <float> (1 / (2 * <float> (self.diameter ** 2)))
-                glcm[j, i] += <float> (1 / (2 * <float> (
-                        self.diameter ** 2)))  # Symmetric for ASM.
+                glcm[j, i] += <float> (1 / (2 * <float> (self.diameter ** 2)))
 
         mean_i /= self.diameter ** 2
         mean_j /= self.diameter ** 2
@@ -216,9 +230,10 @@ cdef class CyGLCM:
         if std != 0:
             for cr in range(self.bins):
                 for cc in range(self.bins):
-                    features[CORRELATION] += glcm[cr, cc] * (
-                            <float> cr - mean_i) * (
-                                                     <float> cc - mean_j) / std
+                    features[CORRELATION] += \
+                        glcm[cr, cc] *\
+                        (<float> cr - mean_i) *\
+                        (<float> cc - mean_j) / std
 
         features[MEAN] += <float> ((mean_i + mean_j) / 2)
         features[VAR] += <float> ((var_i + var_j) / 2)
@@ -321,8 +336,3 @@ cdef class CyGLCM:
             (original, ar_w[s + s:, s + s:]))
 
         return pairs
-
-# Duplication Issue
-# Not Pairs
-# Not Reference Issue
-#
