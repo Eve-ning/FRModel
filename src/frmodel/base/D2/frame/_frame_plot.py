@@ -17,17 +17,20 @@ from frmodel.base import CONSTS
 if TYPE_CHECKING:
     from frmodel.base.D2 import Frame2D
 
+
 @dataclass
 class Frame2DPlot:
-
     f: 'Frame2D'
     subplot_shape: tuple = None
 
     def _create_grid(self,
-                     scale: float = 1.0):
+                     scale: float = 1.0,
+                     aspect=None,
+                     ):
         """ Facilitates in create a subplot grid for plotting functions.
 
         :param scale: Scale of the plot
+        :param aspect: Override aspect ratio
         :returns: An Axes reference generator
         """
         channels = self.f.data.shape[-1]
@@ -40,8 +43,9 @@ class Frame2DPlot:
 
         gs = GridSpec(rows, cols, wspace=0)
         fig: plt.Figure = plt.gcf()
-        fig.set_figheight(int(self.f.data.shape[0] / 60 * rows * scale))
-        fig.set_figwidth(int(self.f.data.shape[1] / 60 * cols * scale))
+        aspect = aspect if aspect else self.f.data.shape[0] / self.f.data.shape[1]
+        fig.set_figheight(int(aspect * 2 * rows * scale))
+        fig.set_figwidth(int(2 * cols * scale))
 
         for i, t in enumerate(self.f.channels):
             ax = plt.subplot(gs[i])
@@ -68,7 +72,7 @@ class Frame2DPlot:
         """
         for ax, d in self._create_grid(scale):
             d: np.ma.MaskedArray
-            ax.imshow(minmax_scale(d.flatten(), feature_range=(0,1)).reshape(d.shape),interpolation='nearest',
+            ax.imshow(minmax_scale(d.flatten(), feature_range=(0, 1)).reshape(d.shape), interpolation='nearest',
                       cmap=colormap, origin='upper')
         return plt.gcf()
 
@@ -79,7 +83,7 @@ class Frame2DPlot:
         :param bins: Number of bins to pass into hist
         :returns: A plt.Figure
         """
-        for ax, d in self._create_grid(scale):
+        for ax, d in self._create_grid(scale, aspect=1.0):
             ax.hist(d.flatten(), bins=bins)
         return plt.gcf()
 
@@ -114,9 +118,9 @@ class Frame2DPlot:
     def scatter3d(self,
                   chn: CONSTS.CHN,
                   colored: bool = False,
-                  z_scale:int = 1,
-                  point_size:float = 7,
-                  sample_size:int or None = 10000,
+                  z_scale: int = 1,
+                  point_size: float = 7,
+                  sample_size: int or None = 10000,
                   colorscale=px.colors.sequential.Viridis
                   ):
         """ Plot a single index with respect to its X and Y.
@@ -166,6 +170,7 @@ class Frame2DPlot:
 
         fig = go.Figure(data=data, layout=layout)
         return fig
+
 
 class _Frame2DPlot:
     data: np.ndarray
