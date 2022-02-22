@@ -22,7 +22,6 @@ class Frame2DPlot:
 
     f: 'Frame2D'
     subplot_shape: tuple = None
-    titles: list = None
 
     def _create_grid(self,
                      scale: float = 1.0):
@@ -44,11 +43,7 @@ class Frame2DPlot:
         fig.set_figheight(int(self.f.data.shape[0] / 60 * rows * scale))
         fig.set_figwidth(int(self.f.data.shape[1] / 60 * cols * scale))
 
-        titles = self.titles if self.titles else self.f.channels
-
-        assert len(titles) == channels, "Title Length must be same as number of Channels"
-
-        for i, t in enumerate(titles):
+        for i, t in enumerate(self.f.channels):
             ax = plt.subplot(gs[i])
             if channels != 1:
                 ax.set_title(t, loc='left')
