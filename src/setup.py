@@ -1,14 +1,13 @@
-import setuptools
-
-from Cython.Build import cythonize
 import numpy as np
+import setuptools
+from Cython.Build import cythonize
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="frmodel",
-    version="0.1.10",
+    version="0.1.11",
     author="Eve-ning",
     author_email="dev_evening@hotmail.com",
     description="The base package to support frmodel data processing",
@@ -24,12 +23,12 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     setup_requires=["cython", "numpy"],
-    install_requires=["numpy", "seaborn", "sklearn", "scikit-image", "tqdm", "plotly",
+    install_requires=["numpy", "seaborn", "sklearn", "scikit-image", "tqdm",
+                      "plotly",
                       "opencv-python", "imagecodecs"],
     python_requires='>=3.7',
     include_package_data=True,
 )
 
-package_data = { 'mypackage': ['mycythonmodule-filename.pyx']},
+package_data = {'mypackage': ['mycythonmodule-filename.pyx']},
 include_package_data = True
-
