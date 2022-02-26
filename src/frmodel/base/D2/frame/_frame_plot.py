@@ -26,11 +26,13 @@ class Frame2DPlot:
     def _create_grid(self,
                      scale: float = 1.0,
                      aspect=None,
+                     x_axis=True,
                      ):
         """ Facilitates in create a subplot grid for plotting functions.
 
         :param scale: Scale of the plot
         :param aspect: Override aspect ratio
+        :param x_axis: Whether to include the x-axis
         :returns: An Axes reference generator
         """
         channels = self.f.data.shape[-1]
@@ -41,7 +43,7 @@ class Frame2DPlot:
             rows = self.subplot_shape[0]
             cols = self.subplot_shape[1]
 
-        gs = GridSpec(rows, cols, wspace=0)
+        gs = GridSpec(rows, cols,hspace=0.4,wspace=0.1)
         fig: plt.Figure = plt.gcf()
         aspect = aspect if aspect else self.f.data.shape[0] / self.f.data.shape[1]
         fig.set_figheight(int(aspect * 2 * rows * scale))
@@ -51,7 +53,12 @@ class Frame2DPlot:
             ax = plt.subplot(gs[i])
             if channels != 1:
                 ax.set_title(t, loc='left')
-            ax.axis('off')
+
+            if x_axis:
+                ax.axes.get_yaxis().set_visible(False)
+            else:
+                ax.axis('off')
+
             ax.legend_ = None
             ax: plt.Axes
             yield ax, self.f.data[..., i]
@@ -70,9 +77,11 @@ class Frame2DPlot:
         :param colormap: The cmap of imshow. See plt.imshow for available cmaps.
         :returns: A plt.Figure
         """
-        for ax, d in self._create_grid(scale):
+        for ax, d in self._create_grid(scale, x_axis=False):
             d: np.ma.MaskedArray
-            ax.imshow(minmax_scale(d.flatten(), feature_range=(0, 1)).reshape(d.shape), interpolation='nearest',
+            ax.imshow(minmax_scale(d.flatten(),
+                                   feature_range=(0, 1)).reshape(d.shape),
+                      interpolation='nearest',
                       cmap=colormap, origin='upper')
         return plt.gcf()
 
@@ -83,7 +92,7 @@ class Frame2DPlot:
         :param bins: Number of bins to pass into hist
         :returns: A plt.Figure
         """
-        for ax, d in self._create_grid(scale, aspect=1.0):
+        for ax, d in self._create_grid(scale, aspect=1.0, x_axis=True):
             ax.hist(d.flatten(), bins=bins)
         return plt.gcf()
 
