@@ -220,7 +220,11 @@ cdef class CyGLCM:
         for cr in range(self.bins):
             for cc in range(self.bins):
                 features[HOMOGENEITY] += <float> (
-                        glcm[cr, cc] / (1 + <float> (i - j) ** 2))
+                        glcm[cr, cc] / (1 + <float> (i - j) ** 2)
+                )
+                features[CONTRAST] += <float> (
+                        glcm[cr, cc] * <float> (i - j) ** 2
+                )
                 features[ASM] += glcm[cr, cc] ** 2
                 var_i += glcm[cr, cc] * (<float> cr - mean_i) ** 2
                 var_j += glcm[cr, cc] * (<float> cc - mean_j) ** 2
